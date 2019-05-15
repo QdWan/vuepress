@@ -1,3 +1,3 @@
-sudo git add .
-sudo git commit -m "deploy"
+git add .
+git commit -m "deploy"
 git push

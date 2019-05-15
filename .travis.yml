@@ -16,7 +16,7 @@ after_script:
   - git init
   - git add -A
   - git commit -m 'deploy'
-  - git push --force --quiet "https://${GH_Token}@${GIT_PAGE_REF}" master:master
+  - git push --force --quiet "https://$GH_Token@${GIT_PAGE_REF}" master:master
 
 env:
   global:

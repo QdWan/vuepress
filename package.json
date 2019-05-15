@@ -1,6 +1,7 @@
 {
 	"scripts": {
-		"dev": "sudo vuepress dev blog"
+		"dev": "vuepress dev blog",
+		"build": "vuepress build blog"
 	},
   "devDependencies": {
     "vuepress": "^0.14.11"
