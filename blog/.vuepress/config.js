@@ -64,7 +64,7 @@ module.exports = {
 					'使用tinypng压缩png图片',
 					'工具库',
 					'规范commit信息',
-					'用Travis CI自动部署Vuepress博客',
+					'用Travis-CI自动部署Vuepress博客',
 					'项目中碰到的问题'
 				],
 				'/EnvironmentSetting/': [
