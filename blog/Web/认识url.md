@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '认识url'
 ---
 

@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'fetch的用法'
 ---
 

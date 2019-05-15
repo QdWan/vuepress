@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'vue源码学习'
 ---
 

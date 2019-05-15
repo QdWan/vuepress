@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'PWA学习'
 ---
 

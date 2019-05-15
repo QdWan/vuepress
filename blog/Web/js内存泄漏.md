@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: js内存泄漏
 ---
 

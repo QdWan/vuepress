@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'JS的隐式转换'
 ---
 

@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'Vue中的diff算法'
 ---
 

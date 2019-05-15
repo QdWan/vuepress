@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: this的指向
 ---
 

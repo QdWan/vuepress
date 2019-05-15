@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'vuex原理'
 ---
 

@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'HTML学习笔记'
 ---
 

@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'BOM对象'
 ---
 

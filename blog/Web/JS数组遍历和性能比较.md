@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'JS数组遍历和性能比较'
 ---
 

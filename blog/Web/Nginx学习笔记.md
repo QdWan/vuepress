@@ -1,5 +1,4 @@
 ---
-sidebar: 'auto'
 title: 'Nginx学习笔记'
 ---
 

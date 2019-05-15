@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: css学习笔记
 ---
 

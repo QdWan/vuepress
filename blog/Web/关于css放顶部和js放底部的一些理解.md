@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '关于css放顶部和js放底部的一些理解'
 ---
 

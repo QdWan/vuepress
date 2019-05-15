@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '使用gitHook规范commit信息和lint代码'
 ---
 

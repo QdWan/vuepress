@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'HTTP HTTPS HTTP2.0'
 ---
 

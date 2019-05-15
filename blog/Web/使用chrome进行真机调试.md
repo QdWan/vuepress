@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '使用chrome进行真机调试'
 ---
 

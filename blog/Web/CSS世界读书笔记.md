@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'CSS世界读书笔记'
 ---
 

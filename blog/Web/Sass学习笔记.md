@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'Sass学习笔记'
 ---
 

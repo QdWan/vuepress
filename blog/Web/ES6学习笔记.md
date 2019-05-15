@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: ES6学习笔记
 ---
 

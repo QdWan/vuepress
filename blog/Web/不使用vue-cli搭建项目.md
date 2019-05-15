@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 不使用vue-cli搭建项目
 ---
 

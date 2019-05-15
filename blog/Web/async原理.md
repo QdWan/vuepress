@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'async原理'
 ---
 

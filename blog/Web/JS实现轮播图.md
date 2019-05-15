@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: JS实现轮播图
 ---
 

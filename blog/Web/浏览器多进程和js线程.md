@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '浏览器多进程和js线程'
 ---
 

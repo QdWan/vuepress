@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: '使用tinypng压缩png图片'
 ---
 

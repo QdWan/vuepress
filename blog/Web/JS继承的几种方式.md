@@ -1,5 +1,4 @@
 ---
-sidebar: auto
 title: 'JS继承的几种方式'
 ---
 
