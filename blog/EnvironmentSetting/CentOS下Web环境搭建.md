@@ -1,0 +1,80 @@
+---
+sidebar: auto
+title: 'CentOS下Web环境搭建'
+---
+
+## ssh免密码登陆
+
+`ssh-keygen -t rsa -P "password"`
+
+`scp -p ~/.ssh/id_rsa.pub root@<server ip>:/root/.ssh/authorized_keys`
+
+
+
+## 安装Nginx
+
+见[CentOS 7 yum 安装 Nginx](<https://blog.csdn.net/u012486840/article/details/52610320>)
+
+### 添加Nginx的yum源
+
+`rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm`
+
+### 安装Nginx
+
+`yum install -y nginx`
+
+### Nginx的配置文件目录
+
+`/etc/nginx/conf.d/`
+
+
+
+## 安装Node
+
+见[CentOS如何安装Node](<https://blog.csdn.net/lu_embedded/article/details/79138650>)
+
+`yum install epel-release`
+
+`yum install nodejs`
+
+此时的node版本较低，需要更新，否则会出现koa-static中间件使用了ES7新语法等报错信息，见[koa-static报错信息](<https://stackoverflow.com/questions/46029209/koa-static-async-function-isnt-supported-by-old-node-js>)。
+
+### 升级
+
+见[Node升级到最新版本](<https://segmentfault.com/a/1190000015302680>)
+
+#### 安装n
+
+n是nodejs版本管理工具
+
+`npm install -g n`
+
+#### 安装最新版node
+
+`n latest`
+
+#### 切换node版本
+
+输入`n`，会出现版本选择，选择最新版，再次查看node版本，可能仍然是旧版本。
+
+#### 解决失效为问题
+
+详情见上面链接
+
+`vim ~/.bash_profile`
+
+添加
+
+```
+export N_PREFIX=/usr/local #node实际安装位置
+export PATH=$N_PREFIX/bin:$PATH
+```
+
+生效
+
+`source ~/.bash_profile`
+
+### 更换淘宝源
+
+`npm install -g cnpm --registry=https://registry.npm.taobao.org`
+
