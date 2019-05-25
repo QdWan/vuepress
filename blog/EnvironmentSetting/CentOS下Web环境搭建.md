@@ -11,6 +11,14 @@ title: 'CentOS下Web环境搭建'
 
 
 
+## 安装git
+
+`yum info git`
+
+`yum install -y git`
+
+
+
 ## 安装Nginx
 
 见[CentOS 7 yum 安装 Nginx](<https://blog.csdn.net/u012486840/article/details/52610320>)
