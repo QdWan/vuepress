@@ -31,6 +31,10 @@ title: 'CentOS下Web环境搭建'
 
 `yum install -y nginx`
 
+### 运行Nginx
+
+`nginx`
+
 ### Nginx的配置文件目录
 
 `/etc/nginx/conf.d/`
@@ -86,3 +90,38 @@ export PATH=$N_PREFIX/bin:$PATH
 
 `npm install -g cnpm --registry=https://registry.npm.taobao.org`
 
+
+
+## Mysql安装
+
+### 添加mysql yum源
+
+`wget 'https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm'`
+
+`rpm -Uvh mysql57-community-release-el7-11.noarch.rpm`
+
+`yum repolist all | grep mysql`
+
+###yum安装mysql
+
+`yum install mysql-community-server`
+
+### 启动
+
+`service mysqld start`
+
+### 登录
+
+`mysql -u root -p`
+
+### 查看默认密码
+
+`cat /var/log/mysqld.log | grep passwod`
+
+### 修改默认密码
+
+`SET PASSWORD FOR ['root'@'localhost'](mailto:'root'@'localhost') = PASSWORD('newpass');`
+
+### 修改密码安全性限制
+
+`set global validate_password_policy=0;`
