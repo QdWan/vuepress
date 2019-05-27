@@ -27,7 +27,6 @@ module.exports = {
 					children: [
 						'服务端渲染',
 						'项目部署',
-						'不使用vue-cli搭建项目',
 						'ES6学习笔记',
 						'css学习笔记',
 						'网站性能优化',
@@ -60,11 +59,12 @@ module.exports = {
 						'PWA学习',
 						'常用命令',
 						'Nginx学习笔记',
-						'使用tinypng压缩png图片',
+						'图片大小优化',
 						'工具库',
 						'规范commit信息',
 						'用Travis-CI自动部署Vuepress博客',
-						'项目中碰到的问题'
+						'项目中碰到的问题',
+						'碰到的问题'
 					]
 				}
 			],
