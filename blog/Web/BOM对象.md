@@ -10,7 +10,6 @@ title: 'BOM对象'
 - setTimeout
 - open
 - close
-
 - screenLeft：浏览器窗口左边到屏幕左边的距离
 - screenTop：浏览器窗口顶部到屏幕顶部的距离
 
