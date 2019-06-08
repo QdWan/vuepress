@@ -125,3 +125,56 @@ export PATH=$N_PREFIX/bin:$PATH
 ### 修改密码安全性限制
 
 `set global validate_password_policy=0;`
+
+
+
+##Docker安装
+
+删除旧版本
+
+```
+yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+```
+
+安装必要工具
+
+```
+yum install -y yum-utils device-mapper-persistent-data lvm2
+```
+
+添加软件源信息
+
+```
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+更新 yum 缓存
+
+```
+yum makecache fast
+```
+
+安装 Docker-ce
+
+```
+yum -y install docker-ce
+```
+
+启动 Docker 后台服务
+
+```
+systemctl start docker
+```
+
+使用镜像加速器
+
+[Docker镜像加速器](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
