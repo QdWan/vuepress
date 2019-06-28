@@ -10,9 +10,9 @@
 
 以下是我在集成过程中碰到的主要问题，如果对上面三个概念不清楚，可以先阅读我的博客：
 
-- [PWA]([https://limsanity.github.io/Web/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93.html](https://limsanity.github.io/Web/渐进式Web应用PWA.html))
-- [服务端渲染]([https://limsanity.github.io/Web/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93.html](https://limsanity.github.io/Web/服务端渲染开发记录.html))
-- [现代模式构建]([https://limsanity.github.io/Web/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93.html](https://limsanity.github.io/Web/现代模式构建.html))
+- [PWA](渐进式Web应用PWA.html)
+- [服务端渲染](服务端渲染开发记录.html)
+- [现代模式构建](现代模式打包.html)
 
 
 
