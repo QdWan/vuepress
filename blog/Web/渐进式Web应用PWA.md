@@ -4,10 +4,6 @@ PWA全称Progressive Web Application，即渐进式Web应用。它能将该网�
 
 
 
-## 
-
-
-
 ## 使用workbox插件集成到Vue CLI中
 
 下面配置属于一些基础配置，对每个项目可能都需要不同的策略对资源进行缓存，并且做一些功能的实现。
@@ -15,8 +11,12 @@ PWA全称Progressive Web Application，即渐进式Web应用。它能将该网�
 如果想了解清楚以下配置的原理，需要对原生实现进行了解，并对Service Worker生命周期等有一定认识，workbox只是对这些原生实现进行了一些高级封装，使用起来更加方便而已。推荐阅读：
 
 - [Service Worker介绍](<https://developers.google.com/web/fundamentals/primers/service-workers/?hl=zh-cn>)
-
 - [workbox指南](<https://developers.google.com/web/tools/workbox/guides/get-started>)
+
+对于Service Worker进一步使用
+
+- [了解indexDB](https://www.tangshuang.net/3735.html)
+- [sync manager](https://developers.google.com/web/updates/2015/12/background-sync)
 
 Vue CLI生成的项目有提供pwa插件便于快速生成pwa应用，但是它开发时是关闭pwa功能的，因此选择自行配置workbox环境。
 
