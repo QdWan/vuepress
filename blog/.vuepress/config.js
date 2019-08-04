@@ -1,3 +1,5 @@
+const { getFiles } = require('vuepress-file-complete')
+
 module.exports = {
 	title: 'Lim\'s Page',
 	description: 'something about front-end',
@@ -13,6 +15,7 @@ module.exports = {
 			{ text: '博文',
 				items: [
 					{ text: 'Web', link: '/Web/' },
+					{ text: 'Web2', link: '/Web2/' },
 					{ text: 'Environment Setting', link: '/EnvironmentSetting/' },
 					{ text: 'System Analysis', link: '/SystemAnalysis/' }
 				] 
@@ -24,54 +27,14 @@ module.exports = {
 				{
 					title: 'Web',
 					collapsable: false,
-					children: [
-						'服务端渲染',
-						'项目部署',
-						'ES6学习笔记',
-						'css学习笔记',
-						'网站性能优化',
-						'HTTP缓存',
-						'跨域',
-						'闭包',
-						'函数柯里化',
-						'JS实现轮播图',
-						'js内存泄漏',
-						'JS继承的几种方式',
-						'this的指向',
-						'CSRF和XSS',
-						'HTTP-HTTPS-HTTP2.0', 
-						'Vue中的diff算法',
-						'async原理',
-						'HTML学习笔记',
-						'fetch的用法',
-						'待学习',
-						'认识url',
-						'BOM对象',
-						'vue源码学习',
-						'vuex原理',
-						'HTTP状态码',
-						'关于css放顶部和js放底部的一些理解',
-						'浏览器多进程和js线程',
-						'JS数组遍历和性能比较',
-						'单点登录',
-						'高性能JS',
-						'使用chrome进行真机调试',
-						'PWA学习',
-						'常用命令',
-						'Nginx学习笔记',
-						'图片大小优化',
-						'工具库',
-						'规范commit信息',
-						'用Travis-CI自动部署Vuepress博客',
-						'渐进式Web应用PWA',
-						'现代模式打包',
-						'服务端渲染开发记录',
-						'PWA、服务端渲染、现代模式构建的集成',
-						'Docker容器化',
-						'webpack常见配置',
-						'项目中碰到的问题',
-						'碰到的问题'
-					]
+					children: getFiles('blog/Web')
+				}
+			],
+			'/Web2/': [
+				{
+					title: 'Web2',
+					collapsable: false,
+					children: getFiles('blog/Web2')
 				}
 			],
 			'/EnvironmentSetting/': [
