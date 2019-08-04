@@ -3,13 +3,17 @@ const { getFiles } = require('vuepress-file-complete')
 module.exports = {
 	title: 'Lim\'s Page',
 	description: 'something about front-end',
+	plugins: ['@vuepress/pwa'],
+	plugins: {
+		'@vuepress/pwa': {
+			serviceWorker: true,
+			updatePopup: {
+				message: "New content is available.",
+				buttonText: "Refresh"
+			}
+		}
+	},
 	themeConfig: {
-		serviceWorker: {
-	    updatePopup: { 
-	       message: "New content is available.", 
-	       buttonText: "Refresh" 
-	    }
-	  },
 		nav: [
 			{ text: '主页', link: '/' },
 			{ text: '博文',
