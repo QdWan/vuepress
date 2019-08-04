@@ -4,7 +4,7 @@
 		"build": "vuepress build blog"
 	},
 	"devDependencies": {
-		"vuepress": "^0.14.11",
+		"vuepress": "^1.0.3",
 		"vuepress-file-complete": "^1.0.0"
 	}
 }
