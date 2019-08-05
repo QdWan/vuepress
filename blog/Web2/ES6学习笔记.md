@@ -6,7 +6,7 @@ title: ES6学习笔记
 
 资料
 
-- https://exploringjs.com/es6/
+- [exploring es6](https://exploringjs.com/es6/)
 - [阮一峰ES6入门](http://es6.ruanyifeng.com/#README)
 
 
@@ -196,3 +196,19 @@ const map2 = new Map(
 // 产生 Map 结构 {2 => '_a', 4 => '_b', 6 => '_c'}
 ```
 
+
+
+## WeakMap
+
+- WeakMap只接受对象作为键名（null除外）
+- WeakMap键名指向的对象不计入垃圾回收机制
+- WeakMap没有size属性和遍历操作
+- 方法
+  - get()
+  - set()
+  - has()
+  - delete()
+- [用途](https://exploringjs.com/es6/ch_maps-sets.html#sec_weakmap)
+  - 缓存计算结果
+  - 管理listeners
+  - 保存私有数据
