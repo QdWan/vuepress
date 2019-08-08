@@ -212,3 +212,48 @@ const map2 = new Map(
   - 缓存计算结果
   - 管理listeners
   - 保存私有数据
+
+
+
+## Promise
+
+- 传入resolve的参数可以是Promise类型，此时该Promise实例的状态取决于该参数。下面例子中，如果p1的状态为resolved，则p2的回调函数立刻执行；如果p1点状态为pending，则p2的状态也为pending
+
+```js
+const p1 = new Promise(function (resolve, reject) {
+  // ...
+});
+
+const p2 = new Promise(function (resolve, reject) {
+  // ...
+  resolve(p1);
+})
+```
+
+- then方法返回的是一个Promise实例，因此可以采用链式调用，如果前一个then中返回的是一个Promise类型，那么后一个回调函数就会等待该Promise对象状态变化再进行调用
+- Promise对象的错误具有“冒泡”性质，链式调用的then中，其中一个出错，都会被最后的catch所捕获
+- finally在ES2018中引入，不管Promise实例最后的状态是什么，都会执行，但是无法从finally中知道该实例的状态
+- Promise.all接受一个数组作为参数（或者参数具有Iterator接口，并且每个返回的成员都是Promise实例），如果参数不是Promise实例就会先调用Promise.resolve进行转换
+- 如果Promise.all中实例都fulfilled，实例的返回值就会组成一个数组传递给回调函数
+- 如果作为参数的Promise实例，定义了自己的catch方法，那么它一旦被rejected，就不会出发Promise.all的catch方法
+
+- Promise.resolve等价于以下写法
+
+```js
+Promise.resolve('foo')
+// 等价于
+new Promise(resolve => resolve('foo'))
+```
+
+- Promise.resolve的参数可以是一个Promise、thenable对象、不是thenable对象或不是对象、不带任何参数
+
+
+
+## async
+
+- 返回Promise对象
+- 内部的return语句会成为then方法回调函数的参数
+- await后面是一个Promise对象并返回该对象的结果，否则直接返回对应的值（也可以是具有then方法的对象）
+- 任何一个await语句后面的Promise对象变为reject状态，整个async函数都会中断执行，如果希望不会中断，要是用try、catch结构
+- 如果await后面的异步操作出错，那么等同于async函数返回的Promise对象被reject
+- async函数可以保留错误堆栈
