@@ -257,3 +257,64 @@ new Promise(resolve => resolve('foo'))
 - 任何一个await语句后面的Promise对象变为reject状态，整个async函数都会中断执行，如果希望不会中断，要是用try、catch结构
 - 如果await后面的异步操作出错，那么等同于async函数返回的Promise对象被reject
 - async函数可以保留错误堆栈
+
+
+
+## Iterator
+
+
+
+## Symbol
+
+- 基本类型，不能使用new
+- 参数可以为字符串，相同参数的Symbol返回值不相同
+- Symbol可以转布尔值，不能转数值
+- ES2019提供description方法，直接返回Symbol描述
+- Symbom作为对象属性名，不能用点运算符，因为点运算符后面总是字符串
+
+```js
+const mySymbol = Symbol();
+const a = {};
+
+a.mySymbol = 'Hello!';
+a[mySymbol] // undefined
+a['mySymbol'] // "Hello!"
+```
+
+- 在对象的内部，使用symbol值定义的属性要放在方括号内
+
+```js
+let s = Symbol();
+
+let obj = {
+  [s]: function (arg) { ... }
+};
+  
+// 或
+  
+let obj = {
+  [s](arg) { ... }
+};
+
+
+obj[s](123);
+```
+
+- 实例
+  - 消除魔术字符串
+- Symbol属性不会出现在for in、for of循环中，也不会被Object.keys()、Object.getOwnPropertyNames()、JSON.stringify()返回，可以通过Object.getOwnPropertySymbols获取。Reflect.ownKeys也可以访问Symbol的键名，包括常规键名。
+- Symbol.for()可以接受一个字符串参数，搜索是否有一该参数为名的Symbol值，有则返回，无则新建并返回该Symbol对象。
+- Symbol.keyFor(obj)返回一个已登记的Symbol对象的key
+- 内置Symbol值：
+  - Symbol.hasInstance
+  - Symbol.isConcatSpreadable
+  - Symbol.species
+  - Symbol.match
+  - Symbol.replace
+  - Symbol.search
+  - Symbol.search
+  - Symbol.split
+  - Symbol.iterator
+  - Symbol.toPrimitive
+  - Symbol.toStringTag
+  - Symbol.unscopables
