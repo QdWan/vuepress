@@ -25,7 +25,9 @@ title: 'CentOS下Web环境搭建'
 
 ### 添加Nginx的yum源
 
-`rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm`
+```bash
+rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+```
 
 ### 安装Nginx
 
@@ -38,6 +40,15 @@ title: 'CentOS下Web环境搭建'
 ### Nginx的配置文件目录
 
 `/etc/nginx/conf.d/`
+
+### 查看access.log和error.log
+
+```js
+cat /etc/nginx/nginx.conf // 查看accsss.log位置
+cat ${access.log_path}
+```
+
+
 
 
 
