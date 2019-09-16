@@ -2,6 +2,8 @@
 title: ES6学习笔记
 ---
 
+[TOC]
+
 # ES6
 
 资料
@@ -262,13 +264,96 @@ new Promise(resolve => resolve('foo'))
 
 ## Iterator
 
+- 默认的Iterator接口部署在数据结构的`Symbol.iterator`属性。
+- `Symbol.iterator`属性本身是一个函数，该函数返回一个具有`next`方法的对象。
+
+```js
+const obj = {
+  [Symbol.iterator]: function() {
+    return {
+      next: function() {
+        return {
+          value: 1,
+          done: true
+        }
+      }
+    }
+  }
+}
+```
+
+- 具备Iterator接口的数据结构，可以被`for ... of`循环遍历。
+- 原生具备Iterator接口的数据结构：
+  - Array
+  - Map
+  - Set
+  - String
+  - TypedArray
+  - 函数的arguments对象
+  - NodeList对象
+
+```js
+let arr = ['a', 'b', 'c'];
+let iter = arr[Symbol.iterator]();
+
+iter.next(); // { value: 'a', done: false }
+iter.next(); // { value: 'b', done: false }
+iter.next(); // { value: 'c', done: false }
+iter.next(); // { value: undefined, done: true }
+```
+
+- 调用Iterator接口的场合
+  - 对数组和Set结构进行解构赋值
+  - 扩展运算符
+  - yield\*。yield\*后面跟的是一个可遍历结构的话，会调用该结构的遍历器接口。
+  - for of
+  - Array.from()
+  - Promise.all()
+  - Promise.race()
+- 除了next方法，遍历器对象还有可选的return和throw方法。在for of循环中有break和throw new Error()都会触发return方法。return方法返回一个对象，是Generator规定的。
+
+```js
+function readLinesSync(file) {
+  return {
+    [Symbol.iterator]() {
+      return {
+        next() {
+          return { done: false };
+        },
+        return() {
+          file.close();
+          return { done: true };
+        }
+      };
+    },
+  };
+}
+
+// 情况一
+for (let line of readLinesSync(fileName)) {
+  console.log(line);
+  break;
+}
+
+// 情况二
+for (let line of readLinesSync(fileName)) {
+  console.log(line);
+  throw new Error();
+}
+```
+
+- entries()、keys()、values()返回遍历器对象。
+- 对于字符串来说，for of会正确识别32位的UTF-16字符。
+- 并不是所有类数组的对象都具有Iterator接口，解决方法就是调用Array.from将其转换为数组。
+- forEach没有办法通过break或者return命令跳出循环。
+
 
 
 ## Symbol
 
 - 基本类型，不能使用new
 - 参数可以为字符串，相同参数的Symbol返回值不相同
-- Symbol可以转布尔值，不能转数值
+- Symbol可以转布尔值和字符串，不能转数值
 - ES2019提供description方法，直接返回Symbol描述
 - Symbom作为对象属性名，不能用点运算符，因为点运算符后面总是字符串
 

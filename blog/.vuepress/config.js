@@ -45,10 +45,7 @@ module.exports = {
 				{
 					title: '环境配置',
 					collapsable: false,
-					children: [
-						'VuePress搭建',
-						'CentOS下Web环境搭建'
-					]
+					children: getFiles('blog/EnvironmentSetting')
 				}
 			],
 			'/SystemAnalysis/': [
