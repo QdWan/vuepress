@@ -188,3 +188,72 @@ keepalive_requests number;
 默认值为100。指定用户通过某一连接发送请求的次数。
 
 此指令可以在server、location中配置。
+
+
+
+#### 配置网络监听
+
+page 46。
+
+
+
+#### 基于名称的虚拟主机配置
+
+```nginx
+server_name name ...;
+
+// eg
+server_name myserver.com www.myserver.com;
+server_name *.myserver.com www.myserver.*; // 通配符只能在首段或尾段
+server_name ~^www\d+\.myserver\.com$;
+server_name ~^www\.(.+)\.com$; // 捕获内容记录到$1中
+```
+
+匹配顺序：
+
+1. 准确匹配server_name
+2. 通配符在开始时匹配server_name成功
+3. 通配符在结尾时匹配server_name成功
+4. 正则表达式匹配server_name成功
+
+
+
+#### 基于IP的虚拟主机配置
+
+page 48。
+
+
+
+#### 配置location块
+
+```nginx
+location [ = | ~ | ~* | ^~ ] uri { ... }
+
+// eg
+location = / { ... }
+location ^~ /static/ { ... }
+location ~ \.(gif|jpg|png|js|css)$ { ... }
+location ~* \.png$ { ... }
+```
+
+- = 用于标准uri前，要求请求字符串与uri严格匹配
+- ~ 用于表示uri包含正则表达式，并且区分大小写
+- ~* 用于表示uri包含正则表达式，并且不区分大小写
+  - 如果uri包含正则表达式，必须包含 ~ 或 ~* 标识
+- ^~ 用于标准uri，要求Nginx找到uri和请求字符串匹配度最高的location
+  - ^~ 会对uri进行编码处理，例如：/html/%20/data 可以匹配 ^~ /html/ /data
+
+
+
+#### 配置请求的根目录
+
+```nginx
+root path;
+
+// eg
+location / {
+  root /dist;
+}
+```
+
+当location块接收到 /dist/index.html请求时，就会
