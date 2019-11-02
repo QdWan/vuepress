@@ -122,3 +122,138 @@ default_type  application/octet-stream;
 用于识别前端请求的资源类型。如果不指定default_type，默认值为text/plain。
 
 此指令可以在http、server或者location中配置。
+
+
+
+#### 自定义服务日志
+
+```nginx
+access_log path [format] [buffersize];
+log_format name string ...;
+
+# 关闭
+access_log off;
+
+# eg
+access_log logs/access.log combined;
+log_format combined '$remote_addr - [$time_local] "$request" ' 
+										'$status $body_bytes_sent "$http_referer" '
+ 										'$http_user_agent';
+
+# output
+192.168.1.102 - [31/Oct/2011:20:41:39 +800] "GET /favicon.ico HTTP/1.1" 404 570 "-" "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)"
+```
+
+path是日志存放路径和名称；format是在log_format中定义，指定日志输出格式；size指定存放日志的内存缓存区大小。
+
+access_log指令可以在http、server、location中设置。log_format指令只能在http中设置。
+
+
+
+#### 配置允许sendfile方式传输文件
+
+```nginx
+sendfile on | off;
+sendfile_max_chunk size;
+```
+
+sendfile默认值为off；sendfile_max_chunk默认值为0，表示无限制，每个worker process每次调用sendfile()传输的数据量不能超过这个值。
+
+此指令可以在http、server、location中配置。
+
+[关于sendfile零拷贝](<https://www.jianshu.com/p/70e1c396c320>)
+
+[零拷贝原理](<https://leokongwq.github.io/2017/01/12/linux-zero-copy.html>)
+
+
+
+#### 配置连接超时时间
+
+```nginx
+keepalive_timeout timeout [header_timeout];
+```
+
+timeout默认值为75s。如果指定了header_timeout，将会在应答报头文头部设置keep-alive时间，可被Mozilla或者Konqueror识别。
+
+该指令可以在http、server、location块中设置。
+
+
+
+#### 单连接请求数上限
+
+```nginx
+keepalive_requests number;
+```
+
+默认值为100。指定用户通过某一连接发送请求的次数。
+
+此指令可以在server、location中配置。
+
+
+
+#### 配置网络监听
+
+page 46。
+
+
+
+#### 基于名称的虚拟主机配置
+
+```nginx
+server_name name ...;
+
+// eg
+server_name myserver.com www.myserver.com;
+server_name *.myserver.com www.myserver.*; // 通配符只能在首段或尾段
+server_name ~^www\d+\.myserver\.com$;
+server_name ~^www\.(.+)\.com$; // 捕获内容记录到$1中
+```
+
+匹配顺序：
+
+1. 准确匹配server_name
+2. 通配符在开始时匹配server_name成功
+3. 通配符在结尾时匹配server_name成功
+4. 正则表达式匹配server_name成功
+
+
+
+#### 基于IP的虚拟主机配置
+
+page 48。
+
+
+
+#### 配置location块
+
+```nginx
+location [ = | ~ | ~* | ^~ ] uri { ... }
+
+// eg
+location = / { ... }
+location ^~ /static/ { ... }
+location ~ \.(gif|jpg|png|js|css)$ { ... }
+location ~* \.png$ { ... }
+```
+
+- = 用于标准uri前，要求请求字符串与uri严格匹配
+- ~ 用于表示uri包含正则表达式，并且区分大小写
+- ~* 用于表示uri包含正则表达式，并且不区分大小写
+  - 如果uri包含正则表达式，必须包含 ~ 或 ~* 标识
+- ^~ 用于标准uri，要求Nginx找到uri和请求字符串匹配度最高的location
+  - ^~ 会对uri进行编码处理，例如：/html/%20/data 可以匹配 ^~ /html/ /data
+
+
+
+#### 配置请求的根目录
+
+```nginx
+root path;
+
+// eg
+location / {
+  root /dist;
+}
+```
+
+当location块接收到 /dist/index.html请求时，就会
