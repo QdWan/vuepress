@@ -21,7 +21,7 @@ module.exports = {
 					{ text: 'Web', link: '/Web/' },
 					{ text: 'Web2', link: '/Web2/' },
 					{ text: 'Environment Setting', link: '/EnvironmentSetting/' },
-					{ text: 'System Analysis', link: '/SystemAnalysis/' }
+					{ text: 'Kubernetes', link: '/Kubernetes/' }
 				] 
 			},
 			{ text: 'Github', link: 'https://github.com/Limsanity' },
@@ -48,18 +48,11 @@ module.exports = {
 					children: getFiles('blog/EnvironmentSetting')
 				}
 			],
-			'/SystemAnalysis/': [
+			'/Kubernetes/': [
 				{
-					title: '系统分析',
+					title: 'Kubernetes',
 					collapsable: false,
-					children: [
-						'homework1',
-						'homework2',
-						'homework3',
-						'homework4',
-						'homework5',
-						'homework6'
-					]
+					children: getFiles('blog/Kubernetes')
 				}
 			],
 			'/': [
