@@ -1,6 +1,12 @@
 ## Kubernetes
 
 ```bash
+swapoff -a
+cd /etc/default && vim grup
+GRUP_CMDLINE_LINUX="cgroup_enable=memory"
+update-grub2
+reboot
+
 { "exec-opts": ["native.cgroupdriver=systemd"] } // /etc/docker/daemon.json
 systemctl daemon-reload
 systemctl restart docker
