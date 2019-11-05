@@ -1,6 +1,26 @@
 ## Kubernetes
 
 ```bash
+swapoff -a
+cd /etc/default && vim grup
+GRUP_CMDLINE_LINUX="cgroup_enable=memory"
+update-grub2
+reboot
+
+{ "exec-opts": ["native.cgroupdriver=systemd"] } // /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
+
+swapoff -a
+
+apt install systemd-sysv
+reboot
+apt-get remove virtualbox-6.0
+
+minikube start --vm-driver=none --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers
+```
+
+```bash
 export HTTP_PROXY=http://(your_host_machine_ip)192.168.99.1:1087
 export NO_PROXY=minikube_ip
 minikube start --vm-driver=virtualbox
