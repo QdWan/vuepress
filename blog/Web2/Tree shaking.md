@@ -1,5 +1,9 @@
 # Tree shaking
 
+### Code Repo
+
+[learn-treeshaking](https://github.com/Limsanity/learn-treeshaking)
+
 ### 什么是Tree shaking
 
 Tree shaking即Webpack会在打包过程去除一些没有用到的代码，依赖于import / export。
