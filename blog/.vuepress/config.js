@@ -21,7 +21,8 @@ module.exports = {
 					{ text: 'Web', link: '/Web/' },
 					{ text: 'Web2', link: '/Web2/' },
 					{ text: 'Environment Setting', link: '/EnvironmentSetting/' },
-					{ text: 'Kubernetes', link: '/Kubernetes/' }
+					{ text: 'Kubernetes', link: '/Kubernetes/' },
+					{ text: 'Docker', link: '/Docker/' },
 				] 
 			},
 			{ text: 'Github', link: 'https://github.com/Limsanity' },
@@ -53,6 +54,13 @@ module.exports = {
 					title: 'Kubernetes',
 					collapsable: false,
 					children: getFiles('blog/Kubernetes')
+				}
+			],
+			'/Docker/': [
+				{
+					title: 'Docker',
+					collapsable: false,
+					children: getFiles('blog/Docker')
 				}
 			],
 			'/': [
