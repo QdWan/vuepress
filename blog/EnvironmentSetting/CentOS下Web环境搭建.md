@@ -5,9 +5,25 @@ title: 'CentOS下Web环境搭建'
 
 ## ssh免密码登陆
 
-`ssh-keygen -t rsa -P "password"`
+```bash
+ssh-keygen -t rsa -P "password"
+scp -p ~/.ssh/id_rsa.pub root@<server ip>:/root/.ssh/authorized_keys
 
-`scp -p ~/.ssh/id_rsa.pub root@<server ip>:/root/.ssh/authorized_keys`
+# 如果 remote server 碰到 chmod: 更改"authorized_keys" 的权限: 不允许的操作
+yum install e2fsprogs
+cd ~/.ssh
+chattr -i authorized_keys
+
+# S ~/.ssh/config
+Host *
+    ServerAliveInterval 240
+
+Host pomo
+    HostName <server ip>
+    User root
+    IdentityFile ~/.ssh/id_rsa
+# E ~/.ssh/config
+```
 
 
 
