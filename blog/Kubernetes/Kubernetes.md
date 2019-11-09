@@ -27,6 +27,8 @@ minikube start --vm-driver=virtualbox
 ```
 
 ```bash
+kubectl cluster-info
+kubectl version
 kubectl get no
 kubectl run nginx --image=nginx:1.7.9
 kubectl get deploy
