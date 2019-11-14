@@ -21,4 +21,3 @@ vue create出来的spa项目，通常打包之后只需要将dist文件夹放入
 ### Nuxt项目容器化建议
 
 容器化可以采用多阶段构建的方式，第一个阶段中执行build，第二个阶段中安装production环境依赖并启动项目。阶段一中产生出来的.nuxt文件夹和node_modules可以传递给阶段二，这里的node_modules可以执行`npm prune --production`保留必要的包。
-
