@@ -64,7 +64,7 @@ audit:
     - lhci upload --target=temporary-public-storage
 ```
 
-这里没有直接运行`lhci autorun`是因为想指定chromeFlags。chromeFlags如果不指定`--no-sandbox`可能会出错，具体原因还没有详细了解。[chromeFlags的配置](<https://peter.sh/experiments/chromium-command-line-switches/>)。
+这里没有直接运行`lhci autorun`是因为想指定chromeFlags。chromeFlags如果不指定`--no-sandbox`可能会出错，具体原因还没有详细了解([How do I create a Docker container that runs Headless Chrome?](https://developers.google.com/web/updates/2017/04/headless-chrome#faq))。[chromeFlags的配置](<https://peter.sh/experiments/chromium-command-line-switches/>)。
 
 这里的upload命令是上传至Google，命令行中会给出上传地址，例如：
 
