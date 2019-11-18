@@ -1,5 +1,3 @@
-[TOC]
-
 ## lhci-ci集成初探
 
 ### 制作能够运行lhci-cli的docker镜像
