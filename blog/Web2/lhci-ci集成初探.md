@@ -74,7 +74,7 @@ audit:
 
 ### 关于Upload审计结果
 
-lighthouse审计出来的结果可以选择传到自己的服务器。服务器的搭建可见[构建自己的Lighthouse CI Server](<https://limsanity.github.io/Web2/%E9%9B%86%E6%88%90lighthouse-ci.html#%E9%9B%86%E6%88%90lighthouse-ci>)，这篇是解决lighthouse-ci中readme而来的。自建服务器好处在于：审查数据不会公开、审查数据可以保存用来和之前的进行对比，如果只上传至google，只能看见当次的审查结果。
+lighthouse审计出来的结果可以选择传到自己的服务器。服务器的搭建可见[构建自己的Lighthouse CI Server](<https://limsanity.github.io/Web2/%E9%9B%86%E6%88%90lighthouse-ci.html#%E9%9B%86%E6%88%90lighthouse-ci>)，这篇是借鉴lighthouse-ci中readme而来的。自建服务器好处在于：审查数据不会公开、审查数据可以保存用来和之前的进行对比，如果只上传至google，只能看见当次的审查结果。
 
 如果要上传到自己搭建的服务器中，需要解决一些问题：
 
