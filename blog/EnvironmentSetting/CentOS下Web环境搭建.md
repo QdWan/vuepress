@@ -3,6 +3,24 @@ sidebar: auto
 title: 'CentOS下Web环境搭建'
 ---
 
+## 更换yum源
+
+```bash
+# 备份系统自带yum源配置文件
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+
+# 下载aliyun的yum源配置文件
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+yum makecache
+
+yum -y update
+```
+
+
+
+
+
 ## ssh免密码登陆
 
 ```bash
