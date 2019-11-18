@@ -76,7 +76,7 @@ audit:
 
 ### 关于Upload审计结果
 
-lighthouse审计出来的结果可以选择传到自己的服务器。服务器的搭建可见[构建自己的Lighthouse CI Server](<https://limsanity.github.io/Web2/%E9%9B%86%E6%88%90lighthouse-ci.html#%E9%9B%86%E6%88%90lighthouse-ci>)，这篇是解决lighthouse-ci中readme而来的。
+lighthouse审计出来的结果可以选择传到自己的服务器。服务器的搭建可见[构建自己的Lighthouse CI Server](<https://limsanity.github.io/Web2/%E9%9B%86%E6%88%90lighthouse-ci.html#%E9%9B%86%E6%88%90lighthouse-ci>)，这篇是解决lighthouse-ci中readme而来的。自建服务器好处在于：审查数据不会公开、审查数据可以保存用来和之前的进行对比，如果只上传至google，只能看见当次的审查结果。
 
 如果要上传到自己搭建的服务器中，需要解决一些问题：
 
@@ -102,8 +102,9 @@ http://localhost:9001/v1/projects
 
 #### 问题二
 
-当你再次执行上面的POST请求，同样可以创建一个同名的项目，因此如何创建不重复的项目就成为一个难题：通过项目id或token判断唯一的话，CI流程中如何获取这个id或token呢？
+再次执行上面的POST请求，同样可以创建一个同名的项目，因此如何创建不重复的项目就成为一个难题：通过项目id或token判断唯一的话，CI流程中如何获取这个id或token呢？
 
 #### 问题三
 
-审计结果上传到自己的服务器需要token，这个token在创建项目时可以获取到。问题二其实也跟这个问题有所管联，就是如何在CI中获取当前项目的token？
+审计结果上传到自己的服务器需要token，这个token在创建项目时可以获取到。问题二其实也跟这个问题有所关联，就是如何在CI中获取当前项目的token？
+
