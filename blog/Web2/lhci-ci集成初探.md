@@ -36,7 +36,7 @@ docker push limsanity3/node-lighthouse-ci
 
 在vue项目根目录添加`.gitlab-ci.yml`：
 
-```dockerfile
+```yaml
 stages:
   - build
   - audit
