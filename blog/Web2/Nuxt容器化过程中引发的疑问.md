@@ -1,3 +1,7 @@
+---
+sidebar: auto
+---
+
 ## Nuxt容器化过程中引发的疑问
 
 ### 为什么@nuxt/vuetify这个模块是配置在buildModules属性中

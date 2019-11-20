@@ -1,3 +1,7 @@
+---
+sidebar: auto
+---
+
 ## 集成lighthouse-ci
 
 ### 安装运行lighthouse-ci
