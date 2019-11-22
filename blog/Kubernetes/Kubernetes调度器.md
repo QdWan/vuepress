@@ -16,3 +16,15 @@ kube-scheduler是Kubernetes默认调度器。你可以设计并使用自己的�
 
 个体和共同的资源需求、硬件、软件、约束策略、亲和性、反亲和性、本地数据、内在负载接口都会成为调度决定的因素。
 
+## 使用kube-scheduler进行调度
+
+kube-scheduler挑选node会经过两个步骤
+
+1. 筛选
+2. 评分
+
+筛选步骤为Pod找到一系列合适的node。举个例子，PodFitsResources筛选器检查是否存在一个Node拥有足够可用的资源。经过这一步骤，通常可以得到不止一个Node，如果不存在合适的Node，Pod将不会被调度。
+
+评分步骤将为筛选出来的Node进行评分，并选择一个最为合适的Node。
+
+最后，kube-schduler将Pod
