@@ -24,6 +24,7 @@ module.exports = {
 					{ text: 'Kubernetes', link: '/Kubernetes/' },
 					{ text: 'Docker', link: '/Docker/' },
 					{ text: 'Linux', link: '/Linux/' },
+					{ text: 'Nginx', link: '/Nginx/' }
 				] 
 			},
 			{ text: 'Github', link: 'https://github.com/Limsanity' },
@@ -69,6 +70,13 @@ module.exports = {
 					title: 'Linux',
 					collapsable: false,
 					children: getFiles('blog/Linux')
+				}
+			],
+			'/Nginx/': [
+				{
+					title: 'Nginx',
+					collapsable: false,
+					children: getFiles('blog/Nginx')
 				}
 			],
 			'/': [
