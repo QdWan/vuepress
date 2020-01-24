@@ -194,3 +194,58 @@ sticky route可以传递多个参数，第一个非空的参数作为路由依�
 
 ### Passive Health Checks
 
+```nginx
+upstream backend {
+  server backend1.example.com:1234 max_fails=3 fail_timeout=3s;
+  server backend2.example.com:1234 max_fails=3 fail_timeout=3s;
+}
+```
+
+Nginx默认开启健康检查。可用于HTTP、TCP和UDP。
+
+
+
+### Active Health Checks（Nginx Plus）
+
+```nginx
+http {
+  server {
+    location / {
+      proxy_pass http://backend;
+      health_check interval=2s
+          fails=2
+          passes=5
+          uri=/
+          match=welcome;
+    }
+  }
+  
+  match welcome {
+    status 200;
+    header Content-Type = text/html;
+    body ~ "Welcome to nginx!";
+  }
+}
+```
+
+对于HTTP，在location块中使用`health_check`指令。上述示例中，配置了每两秒对上游服务器发起URI为 ‘/’ 的HTTP请求，上游服务器连续通过5次请求则认为其是健康的，如果连续失败两次则认为其是不健康的。上游服务器的响应需要满足match块中的内容，即响应码为200，头部包含类型为text/html的Content-Type，响应体为“Welcome to nginx！”。
+
+```nginx
+stream {
+  server {
+    listen 1234;
+    proxy_pass stream_backend;
+    health_check interval=10s
+        passes=2
+        fails=3;
+    health_check_timeout 5s;
+  }
+}
+```
+
+UDP、TCP和HTTP的区别在于TCP中参数没有uri，并且match块中只有`send`和`expect`两个指令，`send`是发送的数据，`expect`是响应的数据。
+
+
+
+### Slow Start
+
