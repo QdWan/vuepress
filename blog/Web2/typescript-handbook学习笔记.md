@@ -2,7 +2,7 @@
 sidebar: auto
 ---
 
-# Handbook
+# TypeScript Handbook笔记
 
 ## Basic Types
 
@@ -216,3 +216,66 @@ let strLength: number = (someValue as string).length;
 ```
 
 如果使用JSX，那么需要使用方式二。
+
+
+
+## Variable Declarations
+
+### `let` declaration
+
+`catch`语句括号中的变量拥有块级作用域。
+
+```js
+try {
+    throw "oh no!";
+}
+catch (e) {
+    console.log("Oh well.");
+}
+
+// Error: 'e' doesn't exist here
+console.log(e);
+```
+
+函数中`let`声明不可和参数名一致（暂时性死区表现），但是函数内的诸如`if`块可以声明。
+
+```js
+// 示例一
+function f(x) {
+    let x = 100; // error: interferes with parameter declaration
+}
+
+// 示例二
+function f(condition, x) {
+    if (condition) {
+        let x = 100;
+        return x;
+    }
+
+    return x;
+}
+
+f(false, 0); // returns '0'
+f(true, 0);  // returns '100'
+```
+
+### Destructuring
+
+数组解构赋值可以忽略其中一些元素。
+
+```js
+let [, second, , fourth] = [1, 2, 3, 4];
+console.log(second); // outputs 2
+console.log(fourth); // outputs 4
+```
+
+对象解构赋值：
+
+```js
+let { a, ...passthrough } = o;
+let total = passthrough.b + passthrough.c.length;
+```
+
+
+
+## Interface
