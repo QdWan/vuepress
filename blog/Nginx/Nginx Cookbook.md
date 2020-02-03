@@ -249,3 +249,61 @@ UDP、TCP和HTTP的区别在于TCP中参数没有uri，并且match块中只有`s
 
 ### Slow Start
 
+```nginx
+upstream {
+  zone backend 64k;
+  
+  server server1.example.com slow_start=20s;
+  server server2.example.com slow_start=15s;
+}
+```
+
+慢启动可以控制上游服务器在启动的一定时间内接受的连接数。上游服务器启动时可能需要重启数据库等一系列操作，慢启动则可以保证其启动过程不会再次被大量请求淹没。例如上述server1服务器权重在20s时间内从0变到1。
+
+
+
+## Traffic Management
+
+### A/B Testing
+
+```nginx
+split_clients "${remote_addr}AAA" $variant {
+  20.0%  "backendv2";
+  *      "backednv1";
+}
+
+location / {
+  proxy_pass http://$variant
+}
+```
+
+`${remote_addr}AAA`将作为哈希的参数，计算出的值如果<20%则`$variant`的值为backendv2，其余则为backendv1。使用该方法可以很方便的进行A/B测试。
+
+
+
+### Using the GeoIP Module and Database
+
+
+
+### Restricting Access Based on Country
+
+```nginx
+http {
+  map $geoip_country_code $country_access {
+    "US"    0;
+    "RU"    0;
+    default 1;
+  }
+  
+  server {
+    if ($country_access = '1') {
+      return 403;
+    }
+  }
+}
+```
+
+
+
+### Finding the Original Client
+
