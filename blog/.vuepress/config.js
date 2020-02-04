@@ -89,7 +89,10 @@ module.exports = {
 	},
 	head: [
 		['link', { rel: 'manifest', href: '/manifest.json' }],
-		['link', { rel: 'apple-touch-icon', href: '/zelda.png' }]
+		['link', { rel: 'apple-touch-icon', href: '/zelda.png' }],
+		['link', { rel: 'apple-touch-icon', sizes: '152x152', href: '/zelda.png' }],
+		['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/zelda.png' }],
+		['link', { rel: 'apple-touch-icon', sizes: '167x167', href: '/zelda.png' }],
 	],
 	serviceWorker: true,
 	ga: 'UA-139863230-2'
