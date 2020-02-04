@@ -512,3 +512,206 @@ class Location {
 }
 ```
 
+
+
+## Classes
+
+### EMAScript Private Fields
+
+在TS 3.8中，`private`支持新的语法`#`：
+
+```ts
+class Animal {
+    #name: string;
+    constructor(theName: string) { this.#name = theName; }
+}
+
+new Animal("Cat").#name; // Property '#name' is not accessible outside class 'Animal' because it has a private identifier.
+```
+
+### Understanding TypeScript's `private`
+
+在TS中，类A和类B如果结构上一致，即有相同的属性方法，则认为两者是相容的。但是如果属性为`private`或`protected`，并且类A和类B不是父子关系，那么两者就是不相容的了：
+
+```ts
+class Animal {
+    private name: string;
+    constructor(theName: string) { this.name = theName; }
+}
+
+class Rhino extends Animal {
+    constructor() { super("Rhino"); }
+}
+
+class Employee {
+    private name: string;
+    constructor(theName: string) { this.name = theName; }
+}
+
+let animal = new Animal("Goat");
+let rhino = new Rhino();
+let employee = new Employee("Bob");
+
+animal = rhino;
+animal = employee; // Error: 'Animal' and 'Employee' are not compatible
+```
+
+### Understanding `protected`
+
+构造函数也可以是`protected`，这意味着该类无法被外部实例化，但是继承它的子类可以通过`super()`调用：
+
+```ts
+class Person {
+    protected name: string;
+    protected constructor(theName: string) { this.name = theName; }
+}
+
+// Employee can extend Person
+class Employee extends Person {
+    private department: string;
+
+    constructor(name: string, department: string) {
+        super(name);
+        this.department = department;
+    }
+
+    public getElevatorPitch() {
+        return `Hello, my name is ${this.name} and I work in ${this.department}.`;
+    }
+}
+
+let howard = new Employee("Howard", "Sales");
+let john = new Person("John"); // Error: The 'Person' constructor is protected
+```
+
+### Readonly modifier
+
+类中构造函数参数也可以被`readonly`修饰，意味着该类包含该参数名的属性：
+
+```ts
+class Octopus {
+    readonly numberOfLegs: number = 8;
+    constructor(public readonly name: string) {
+    }
+}
+
+const octopus = new Octopus("octopus");
+console.log(octopus.name) // "octopus"
+```
+
+### Accessors
+
+通过`get`、`set`，可以做一些拦截功能：
+
+```ts
+const fullNameMaxLength = 10;
+
+class Employee {
+    private _fullName: string;
+
+    get fullName(): string {
+        return this._fullName;
+    }
+
+    set fullName(newName: string) {
+        if (newName && newName.length > fullNameMaxLength) {
+            throw new Error("fullName has a max length of " + fullNameMaxLength);
+        }
+        
+        this._fullName = newName;
+    }
+}
+
+let employee = new Employee();
+employee.fullName = "Bob Smith";
+if (employee.fullName) {
+    console.log(employee.fullName);
+}
+```
+
+注意事项：
+
+- 使用accessors需要设置编译器输出ECMAScript5以上版本。
+- 如果只有`get`没有`set`，则默认为`readonly`。
+
+### Static Properties
+
+通过`Classname.propertyname`的格式来调用：
+
+```ts
+class Grid {
+    static origin = {x: 0, y: 0};
+    calculateDistanceFromOrigin(point: {x: number; y: number;}) {
+        let xDist = (point.x - Grid.origin.x);
+        let yDist = (point.y - Grid.origin.y);
+        return Math.sqrt(xDist * xDist + yDist * yDist) / this.scale;
+    }
+    constructor (public scale: number) { }
+}
+
+let grid1 = new Grid(1.0);  // 1x scale
+let grid2 = new Grid(5.0);  // 5x scale
+
+console.log(grid1.calculateDistanceFromOrigin({x: 10, y: 10}));
+console.log(grid2.calculateDistanceFromOrigin({x: 10, y: 10}));
+```
+
+### Abstract Classes
+
+抽象类不可被实例化，但是其方法可能已包含实现细节。`abstract`关键字可以用于定义类以及类的方法：
+
+```ts
+abstract class Animal {
+    abstract makeSound(): void;
+    move(): void {
+        console.log("roaming the earth...");
+    }
+}
+```
+
+抽象方法不包含实现细节，其子类必须实现这些抽象方法。
+
+### Advanced Techniques
+
+可以将类直接赋给变量，该变量可以直接调用类的静态属性：
+
+```ts
+class Greeter {
+    static standardGreeting = "Hello, there";
+    greeting: string;
+    greet() {
+        if (this.greeting) {
+            return "Hello, " + this.greeting;
+        }
+        else {
+            return Greeter.standardGreeting;
+        }
+    }
+}
+
+let greeter1: Greeter;
+greeter1 = new Greeter();
+console.log(greeter1.greet()); // "Hello, there"
+
+let greeterMaker: typeof Greeter = Greeter;
+greeterMaker.standardGreeting = "Hey there!";
+
+let greeter2: Greeter = new greeterMaker();
+console.log(greeter2.greet()); // "Hey there!"
+```
+
+接口可以实现类：
+
+```ts
+class Point {
+    x: number;
+    y: number;
+}
+
+interface Point3d extends Point {
+    z: number;
+}
+
+let point3d: Point3d = {x: 1, y: 2, z: 3};
+```
+
