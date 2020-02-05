@@ -715,3 +715,53 @@ interface Point3d extends Point {
 let point3d: Point3d = {x: 1, y: 2, z: 3};
 ```
 
+
+
+## Functions
+
+函数类型中的参数可以标注名字，类型中的参数名字只是为了增强可读性，函数具体的实现中，参数名可以与类型中参数名不一致：
+
+```ts
+let myAdd: (baseValue: number, increment: number) => number =
+    function(x: number, y: number): number { return x + y; };
+```
+
+默认参数和可选参数不同，可选参数必须放到参数列表最后。
+
+### `this`parameters
+
+函数类型的第一个参数可以指定函数中`this`的类型，这并不是一个真实的参数，只是提供给TS作类型检查：
+
+```ts
+interface Card {
+    suit: string;
+    card: number;
+}
+interface Deck {
+    suits: string[];
+    cards: number[];
+    createCardPicker(this: Deck): () => Card;
+}
+let deck: Deck = {
+    suits: ["hearts", "spades", "clubs", "diamonds"],
+    cards: Array(52),
+    // NOTE: The function now explicitly specifies that its callee must be of type Deck
+    createCardPicker: function(this: Deck) {
+        return () => {
+            let pickedCard = Math.floor(Math.random() * 52);
+            let pickedSuit = Math.floor(pickedCard / 13);
+
+            return {suit: this.suits[pickedSuit], card: pickedCard % 13};
+        }
+    }
+}
+
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
+
+alert("card: " + pickedCard.card + " of " + pickedCard.suit);
+```
+
+### Overloads
+
+函数重载可以有效利用TS的类型检查。
