@@ -765,3 +765,133 @@ alert("card: " + pickedCard.card + " of " + pickedCard.suit);
 ### Overloads
 
 函数重载可以有效利用TS的类型检查。
+
+
+
+## Generics
+
+泛型函数有两种调用方法：
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+// 方法一：指明类型
+let output = identity<string>("myString");  // type of output will be 'string'
+
+// 方法二：类型推断
+let output = identity("myString");  // type of output will be 'string'
+```
+
+### Generic Types
+
+```ts
+// 放到接口函数中
+interface GenericIdentityFn {
+    <T>(arg: T): T;
+}
+function identity<T>(arg: T): T {
+    return arg;
+}
+let myIdentity: GenericIdentityFn = identity;
+
+// 放到接口中
+interface GenericIdentityFn<T> {
+    (arg: T): T;
+}
+function identity<T>(arg: T): T {
+    return arg;
+}
+let myIdentity: GenericIdentityFn<number> = identity;
+```
+
+### Generic Classes
+
+```ts
+class GenericNumber<T> {
+    zeroValue: T;
+    add: (x: T, y: T) => T;
+}
+
+let myGenericNumber = new GenericNumber<number>();
+myGenericNumber.zeroValue = 0;
+myGenericNumber.add = function(x, y) { return x + y; };
+```
+
+需要注意类中的静态成员无法使用泛型标注。
+
+### Generic Constraints
+
+有时候需要使用泛型约束，限定类型具有的属性特点，看下面例子：
+
+```ts
+function loggingIdentity<T>(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}
+```
+
+我们确定传入的类型一定会有`length`属性，但是TS并不知道，这里就会出现错误提示。因此，需要使用`extends`来指明该类型是具有`length`属性的：
+
+```ts
+interface Lengthwise {
+    length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length);  // Now we know it has a .length property, so no more error
+    return arg;
+}
+```
+
+可以定义另一个类型参数，以此来确保代码中获取的属性都是存在于对象中的：
+
+```ts
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "a"); // okay
+getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.
+```
+
+在类的构造函数(静态成员)中引入泛型：
+
+```ts
+function create<T>(c: {new(): T; }): T {
+    return new c();
+}
+
+
+// 具备继承关系
+class BeeKeeper {
+    hasMask: boolean;
+}
+
+class ZooKeeper {
+    nametag: string;
+}
+
+class Animal {
+    numLegs: number;
+}
+
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+    return new c();
+}
+
+createInstance(Lion).keeper.nametag;  // typechecks!
+createInstance(Bee).keeper.hasMask;   // typechecks!
+```
+
