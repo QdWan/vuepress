@@ -69,3 +69,53 @@ main() {
 
 #### 进程的运行
 
+如果`exec`调用成功，调用进程将被覆盖，然后从新程序的入口开始执行。
+
+`exec`并没有建立一个与调用进程并发的新进程，而是用新的进程取代了原来的进程。
+
+`exec`系列调用在Linux系统库中unitstd.h中的函数声明：
+
+- `int execl(const char *path, const char *arg, ...)`
+- `int execlp(const char *file, const char *arg, ...)`
+- `int execle(const char *path, const char *arg, ..., char *const envp[])`
+- `int execv(const char *path, char *const argv[])`
+- `int execvp(const char *file, char *const argv)`
+
+`execl()`第一个参数给出了被执行的程序所在的文件名，文件本身必须是一个真正的可执行程序，不能✅一个shell命令组成的文件。系统只要检查文件的开头两个字节，就可以知道该文件是否为程序文件（程序文件的开头两个字节是系统规定的专用值）：
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+main() {
+  printf("Executing ls\n");
+  execl("/bin/ls", "ls", "-l", NULL);
+  
+  perror("execl failed to run ls");
+  exit(1);
+}
+```
+
+上述例子中，如果`execl()`调用成功，将会运行ls程序替代当前的调用程序，就不会执行到`perror()`。
+
+`execv()`的第一个参数指向执行的程序文件，第二个参数是一个参数列表数组：
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+main() {
+  char* av[] = { "ls", "-l", NULL };
+  execv("/bin/ls", av);
+  perror("execv failed");
+  exit(1);
+}
+```
+
+`execlp()`和`execvp()`分别类似于`execl()`和`execv()`，区别在于第一个参数为简单的文件名，而不是一个路径名，它们通过检索shell环境变量PATH指出的目录，来得到文件名的路径前缀，例如：
+
+- `$PATH=/bin;/usr/bin;/sbin`
+- `$export PATH`
+
+首先会在目录`/bin`查找，然后在`/usr/bin`查找，最后在`/sbin`查找。另外，`execlp()`和`execvp`还可以运行shell程序，而不只是普通程序。
+

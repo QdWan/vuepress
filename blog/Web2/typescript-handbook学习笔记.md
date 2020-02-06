@@ -895,3 +895,167 @@ createInstance(Lion).keeper.nametag;  // typechecks!
 createInstance(Bee).keeper.hasMask;   // typechecks!
 ```
 
+
+
+## Enums
+
+### Numeric enums
+
+数值型枚举类型可以制定从哪个数开始递增：
+
+```ts
+enum Direction {
+    Up = 1,
+    Down,
+    Left,
+    Right,
+}
+```
+
+如果枚举元素是混合类型的，那么没有显示初始化的元素必须在前面或者紧跟数值型元素：
+
+```ts
+enum E {
+    A = getSomeValue(),
+    B, // Error! Enum member must have initializer.
+}
+```
+
+### String enums
+
+字符串类型的枚举元素必须显式初始化：
+
+```ts
+enum Direction {
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT",
+}
+```
+
+### Computed and constant members
+
+满足以下任一条件的枚举成员属于常量：
+
+- 作为枚举类型的第一个成员，并且没有显式初始化：
+
+```ts
+// E.X is constant:
+enum E { X }
+```
+
+- 没有显示初始化，并且前一元素属于数值型常量：
+
+```ts
+// All enum members in 'E1' and 'E2' are constant.
+
+enum E1 { X, Y, Z }
+
+enum E2 {
+    A = 1, B, C
+}
+```
+
+- 使用常量枚举表达式初始化的成员，以下属于枚举常量表达式：
+  - 字符串或数值枚举表达式
+  - 引用事先定义的常量枚举成员
+  - 使用`+`、`-`、`～`任一元运算符的常量表达式
+  - 使用`+`、`-`、`*`、`/`、`%`、`<<`、`>>`、`>>>`、`&`、`｜`、`^`任意二元运算符的常量表达式
+
+其余都是计算型枚举类
+
+```ts
+enum FileAccess {
+    // constant members
+    None,
+    Read    = 1 << 1,
+    Write   = 1 << 2,
+    ReadWrite  = Read | Write,
+    // computed member
+    G = "123".length
+}
+```
+
+### Enums at runtime
+
+枚举类型存在于运行时：
+
+```ts
+enum E {
+    X, Y, Z
+}
+
+function f(obj: { X: number }) {
+    return obj.X;
+}
+
+// Works, since 'E' has a property named 'X' which is a number.
+f(E);
+```
+
+### Enums at compile time
+
+```ts
+enum LogLevel {
+    ERROR, WARN, INFO, DEBUG
+}
+
+/**
+ * This is equivalent to:
+ * type LogLevelStrings = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+ */
+type LogLevelStrings = keyof typeof LogLevel;
+
+function printImportant(key: LogLevelStrings, message: string) {
+    const num = LogLevel[key];
+    if (num <= LogLevel.WARN) {
+       console.log('Log level key is: ', key);
+       console.log('Log level value is: ', num);
+       console.log('Log level message is: ', message);
+    }
+}
+printImportant('ERROR', 'This is a message');
+```
+
+### Reverse mappings
+
+```ts
+enum Enum {
+    A
+}
+let a = Enum.A;
+let nameOfA = Enum[a]; // "A"
+
+// ===> 编译
+
+var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+})(Enum || (Enum = {}));
+var a = Enum.A;
+var nameOfA = Enum[a]; // "A"
+```
+
+### `const` enums
+
+`const`类型的枚举变量和普通枚举变量不同，它将会在编译期间转换成真实的数字：
+
+```ts
+const enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right]
+
+// ===> 编译
+var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
+```
+
+### Ambient enums
+
+`ambient`枚举变量和非`ambient`枚举变量区别在于，`ambiemt`枚举变量成员如果没有显式初始化，则始终会被认为是计算型，而非常量型。
+
