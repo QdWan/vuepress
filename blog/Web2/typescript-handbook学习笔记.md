@@ -1059,3 +1059,5 @@ var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
 
 `ambient`枚举变量和非`ambient`枚举变量区别在于，`ambiemt`枚举变量成员如果没有显式初始化，则始终会被认为是计算型，而非常量型。
 
+[参考阅读](https://stackoverflow.com/questions/28818849/how-do-the-different-enum-variants-work-in-typescript)
+
