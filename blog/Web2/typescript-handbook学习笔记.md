@@ -2,6 +2,10 @@
 sidebar: auto
 ---
 
+[TOC]
+
+
+
 # TypeScript Handbook笔记
 
 ## Basic Types
@@ -1061,3 +1065,394 @@ var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
 
 [参考阅读](https://stackoverflow.com/questions/28818849/how-do-the-different-enum-variants-work-in-typescript)
 
+## Type Inference
+
+## Type Compatibility
+
+typescript中类型兼容是基于结构化类型，即考虑两者的类型是否一致，如下面例子所示，相同结构的接口和类型是兼容的：
+
+```ts
+interface Named {
+    name: string;
+}
+
+class Person {
+    name: string;
+}
+
+let p: Named;
+// OK, because of structural typing
+p = new Person();
+```
+
+### Starting out
+
+在ts中，如果y满足和x一样的结构，那么y就可以赋值给x，即使y中有多余的成员：
+
+```ts
+interface Named {
+    name: string;
+}
+
+let x: Named;
+// y's inferred type is { name: string; location: string; }
+let y = { name: "Alice", location: "Seattle" };
+x = y;
+```
+
+### Comparing two functions
+
+ts中比较函数时仅比较参数列表，不会比较函数名：
+
+```ts
+let x = (a: number) => 0;
+let y = (b: number, s: string) => 0;
+
+y = x; // OK
+x = y; // Error
+```
+
+示例中，x中的每个参数，在y中都有类型与之相对的参数，因此x可以赋值给y，反之不行。之所以允许忽视掉一些参数，是因为在JS中，这种忽视部分参数的写法非常常见，例如`Array#forEach`，它接受的回调函数可以传入3个参数，而常常我们只会传入一个参数：
+
+```ts
+let items = [1, 2, 3];
+
+// Don't force these extra parameters
+items.forEach((item, index, array) => console.log(item));
+
+// Should be OK!
+items.forEach(item => console.log(item));
+```
+
+#### Function Parameter Bivariance
+
+#### Optional Parameters and Rest Parameters
+
+#### Functions with overloads
+
+### Classes
+
+比较类的对象时，只会比较类对象的非成员，静态成员和构造函数不会进行比较。
+
+```ts
+class Animal {
+    feet: number;
+    constructor(name: string, numFeet: number) { }
+}
+
+class Size {
+    feet: number;
+    constructor(numFeet: number) { }
+}
+
+let a: Animal;
+let s: Size;
+
+a = s;  // OK
+s = a;  // OK
+```
+
+#### Private and protected members in classes
+
+如果类a中有`private`类型的成员，那么类b必须也有相对应的`private`成员，而且需要继承自相同的父类，两者才能相容，对于`protected`也是如此。
+
+### Generics
+
+```ts
+interface Empty<T> {
+}
+let x: Empty<number>;
+let y: Empty<string>;
+
+x = y;  // OK, because y matches structure of x
+
+interface NotEmpty<T> {
+    data: T;
+}
+let x: NotEmpty<number>;
+let y: NotEmpty<string>;
+
+x = y;  // Error, because x and y are not compatible
+```
+
+对于泛型，如果没有指定其类型参数，则会认为是`any`：
+
+```ts
+let identity = function<T>(x: T): T {
+    // ...
+}
+
+let reverse = function<U>(y: U): U {
+    // ...
+}
+
+identity = reverse;  // OK, because (x: any) => any matches (y: any) => any
+```
+
+## Advanced Types
+
+### Intersection Types
+
+交叉类型经常用于mixins等概念：
+
+```ts
+function extend<First, Second>(first: First, second: Second): First & Second {
+    const result: Partial<First & Second> = {};
+    for (const prop in first) {
+        if (first.hasOwnProperty(prop)) {
+            (result as First)[prop] = first[prop];
+        }
+    }
+    for (const prop in second) {
+        if (second.hasOwnProperty(prop)) {
+            (result as Second)[prop] = second[prop];
+        }
+    }
+    return result as First & Second;
+}
+
+class Person {
+    constructor(public name: string) { }
+}
+
+interface Loggable {
+    log(name: string): void;
+}
+
+class ConsoleLogger implements Loggable {
+    log(name) {
+        console.log(`Hello, I'm ${name}.`);
+    }
+}
+
+const jim = extend(new Person('Jim'), ConsoleLogger.prototype);
+jim.log(jim.name);
+```
+
+### Union Types
+
+联合类型只能引用多个类型共有的成员：
+
+```ts
+interface Bird {
+    fly();
+    layEggs();
+}
+
+interface Fish {
+    swim();
+    layEggs();
+}
+
+function getSmallPet(): Fish | Bird {
+    // ...
+}
+
+let pet = getSmallPet();
+pet.layEggs(); // okay
+pet.swim();    // errors
+```
+
+### Type Guards and Differentiaing Types
+
+### User-Defined Type Guards
+
+#### Using type predicates
+
+```ts
+function isFish(pet: Fish | Bird): pet is Fish {
+  return (pet as Fish).swim !== undefined;
+}
+
+if (isFish(pet)) {
+  pet.swim();
+} else {
+  pet.fly()
+}
+```
+
+`pet is Fish`就是type predicate。调用`isFish`时，typescript会缩小变量类型范围，推断出pet是Fish类型还是Bird类型。
+
+#### Using the in operator
+
+使用`n in x`表达式同样可以缩小类型范围：
+
+```ts
+function move(pet: Fish | Bird) {
+  if ("swim" in pet) {
+    return pet.swim();
+  }
+  return pet.fly();
+}
+```
+
+### typeof type guards
+
+```ts
+function padLeft(value: string, padding: string | number) {
+  if (typeof padding === "number") {
+    return Array(padding + 1).join(" ") + value;
+  }
+  if (typeof padding === "string") {
+    return padding + value;
+  }
+  throw new Error(`Expected string or number, got '${padding}'.`);
+}
+```
+
+### instanceof type guards
+
+```ts
+interface Padder {
+  getPaddingString(): string;
+}
+
+class SpaceRepeatingPadder implements Padder {
+  constructor(private numSpaces: number) {}
+  getPaddingString() {
+    return Array(this.numSpaces + 1).join(" ");
+  }
+}
+
+class StringPadder implements Padder {
+  constructor(private value: string) {}
+  getPaddingString() {
+    return this.value;
+  }
+}
+
+function getRandomPadder() {
+  return Math.random() < 0.5
+    ? new SpaceRepeatingPadder(4)
+    : new StringPadder("  ");
+}
+
+// Type is 'SpaceRepeatingPadder | StringPadder'
+let padder: Padder = getRandomPadder();
+
+if (padder instanceof SpaceRepeatingPadder) {
+  padder; // type narrowed to 'SpaceRepeatingPadder'
+}
+if (padder instanceof StringPadder) {
+  padder; // type narrowed to 'StringPadder'
+}
+```
+
+### Nullable types
+
+### Optional parameters and properties
+
+开启了`--strictNullChecks`之后可选参数自动添加`|undefined`：
+
+```ts
+function f(x: number, y?: number) {
+  return x + (y || 0);
+}
+f(1, 2);
+f(1);
+f(1, undefined);
+f(1, null); // error, 'null' is not assignable to 'number | undefined'
+```
+
+对于类中可选属性也是一样：
+
+```ts
+class C {
+  a: number;
+  b?: number;
+}
+let c = new C();
+c.a = 12;
+c.a = undefined; // error, 'undefined' is not assignable to 'number'
+c.b = 13;
+c.b = undefined; // ok
+c.b = null; // error, 'null' is not assignable to 'number | undefined'
+```
+
+### Type guards and type assertions
+
+移除`null`的类型守护示例：
+
+```ts
+function f(sn: string | null): string {
+  if (sn == null) {
+    return "default";
+  } else {
+    return sn;
+  }
+}
+
+// 简化
+function f(sn: string | null): string {
+  return sn || "default";
+}
+```
+
+当编译器无法消除`null`或者`undefined`时，例如一些嵌套函数，可以使用类型断言运算符进行手动移除：
+
+```ts
+function broken(name: string | null): string {
+  function postfix(epithet: string) {
+    return name.charAt(0) + ".  the " + epithet; // error, 'name' is possibly null
+  }
+  name = name || "Bob";
+  return postfix("great");
+}
+
+function fixed(name: string | null): string {
+  function postfix(epithet: string) {
+    return name!.charAt(0) + ".  the " + epithet; // ok
+  }
+  name = name || "Bob";
+  return postfix("great");
+}
+```
+
+### Type Aliases
+
+类型别名可以为一种类型（如：基本类型、联合类型等）创建一个别名：
+
+```ts
+type Name = string;
+type NameResolver = () => string;
+type NameOrResolver = Name | NameResolver;
+function getName(n: NameOrResolver): Name {
+  if (typeof n === "string") {
+    return n;
+  } else {
+    return n();
+  }
+}
+```
+
+和接口一样，类型别名可以为泛型：
+
+```ts
+type Container<T> = { value: T };
+
+//
+type Tree<T> = {
+  value: T;
+  left: Tree<T>;
+  right: Tree<T>;
+};
+type LinkedList<T> = T & { next: LinkedList<T> };
+
+//
+interface Person {
+  name: string;
+}
+var people: LinkedList<Person>;
+var s = people.name;
+var s = people.next.name;
+var s = people.next.next.name;
+var s = people.next.next.next.name;
+```
+
+### Interfaces vs. Type Aliases
+
+和接口相比，类型别名不会创建一个新的名字。
+
+在高于2.7版本中，类型别名允许扩展创建一个新的交集类型，如：`type Cat = Animal & { purrs: true }`。
+
+### String Literal Types
