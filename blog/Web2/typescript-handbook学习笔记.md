@@ -1,10 +1,7 @@
 ---
 sidebar: auto
+title: 'TypeScript Handbook笔记'
 ---
-
-[TOC]
-
-
 
 # TypeScript Handbook笔记
 
@@ -1456,3 +1453,171 @@ var s = people.next.next.next.name;
 在高于2.7版本中，类型别名允许扩展创建一个新的交集类型，如：`type Cat = Animal & { purrs: true }`。
 
 ### String Literal Types
+
+### Numeric Literal Types
+
+### Enum Member Types
+
+### Discriminated Unions
+
+- 拥有共通属性
+- 将多个类型联合起来的类型别名
+- 基于共通属性
+
+```ts
+// #1
+interface Square {
+  kind: "square";
+  size: number;
+}
+interface Rectangle {
+  kind: "rectangle";
+  width: number;
+  height: number;
+}
+interface Circle {
+  kind: "circle";
+  radius: number;
+}
+
+// #2
+type Shape = Square | Rectangle | Circle;
+
+// #3
+function area(s: Shape) {
+  switch (s.kind) {
+    case "square":
+      return s.size * s.size;
+    case "rectangle":
+      return s.height * s.width;
+    case "circle":
+      return Math.PI * s.radius ** 2;
+  }
+}
+```
+
+### Exhaustiveness checking
+
+有时候希望编译器告诉开发者没有考虑到覆盖所有类型的错误：
+
+```ts
+function assertNever(x: never): never {
+  throw new Error("Unexpected object: " + x);
+}
+function area(s: Shape) {
+  switch (s.kind) {
+    case "square":
+      return s.size * s.size;
+    case "rectangle":
+      return s.height * s.width;
+    case "circle":
+      return Math.PI * s.radius ** 2;
+    default:
+      return assertNever(s); // error here if there are missing cases
+  }
+}
+```
+
+### Polymorphic this types
+
+```ts
+class BasicCalculator {
+  public constructor(protected value: number = 0) {}
+  public currentValue(): number {
+    return this.value;
+  }
+  public add(operand: number): this {
+    this.value += operand;
+    return this;
+  }
+  public multiply(operand: number): this {
+    this.value *= operand;
+    return this;
+  }
+  // ... other operations go here ...
+}
+
+class ScientificCalculator extends BasicCalculator {
+  public constructor(value = 0) {
+    super(value);
+  }
+  public sin() {
+    this.value = Math.sin(this.value);
+    return this;
+  }
+  // ... other operations go here ...
+}
+
+let v = new ScientificCalculator(2)
+  .multiply(5)
+  .sin()
+  .add(1)
+  .currentValue();
+```
+
+### Index types
+
+使用索引类型可以让编译器检查使用动态属性名的代码，例如：
+
+```ts
+function pluck(o, propertyNames) {
+  return propertyNames.map(n => o[n]);
+}
+```
+
+我们希望能够检测传入propertyNames的属性是否存在于对象o中:
+
+```ts
+function pluck<T, K extends keyof T>(o: T, propertyNames: K[]): T[K][] {
+  return propertyNames.map(n => o[n]);
+}
+
+interface Car {
+  manufacturer: string;
+  model: string;
+  year: number;
+}
+let taxi: Car = {
+  manufacturer: "Toyota",
+  model: "Camry",
+  year: 2014
+};
+
+// Manufacturer and model are both of type string,
+// so we can pluck them both into a typed string array
+let makeAndModel: string[] = pluck(taxi, ["manufacturer", "model"]);
+
+// If we try to pluck model and year, we get an
+// array of a union type: (string | number)[]
+let modelYear = pluck(taxi, ["model", "year"]);
+```
+
+上述例子中使用了索引类型查询运算符`keyof`，`keyof T`将会获得`T`中属性构成的联合类型，例如：
+
+```ts
+let carProps: keyof Car; // the union of ('manufacturer' | 'model' | 'year')
+```
+
+### Index types and index signatures
+
+索引签名的参数类型必须是number或string类型。如果索引签名的索引为string类型，那么`keyof T`的结果是`string | number`，如果索引为number类型，那么`keyof T`的结果为`number`。
+
+```ts
+interface Dictionary<T> {
+  [key: string]: T;
+}
+let keys: keyof Dictionary<number>; // string | number
+let value: Dictionary<number>["foo"]; // number
+```
+
+```ts
+interface Dictionary<T> {
+  [key: number]: T;
+}
+let keys: keyof Dictionary<number>; // number
+let value: Dictionary<number>["foo"]; // Error, Property 'foo' does not exist on type 'Dictionary<number>'.
+let value: Dictionary<number>[42]; // number
+```
+
+### Mapped types
+
