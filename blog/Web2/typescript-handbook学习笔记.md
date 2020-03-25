@@ -1,5 +1,5 @@
 ---
-`sidebar: auto
+sidebar: auto
 title: 'TypeScript Handbook笔记'
 ---
 
