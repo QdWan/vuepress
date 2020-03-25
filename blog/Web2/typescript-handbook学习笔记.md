@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+`sidebar: auto
 title: 'TypeScript Handbook笔记'
 ---
 
@@ -1620,4 +1620,226 @@ let value: Dictionary<number>[42]; // number
 ```
 
 ### Mapped types
+
+TS可以通过映射类型的方式基于旧的类型创建一个新的类型：
+
+```ts
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+type Pick<T, K extends keyof T> = {
+  [P in K]: T[P];
+};
+type Record<K extends keyof any, T> = {
+  [P in K]: T;
+};
+```
+
+需要注意这是创建一个新的类型，而不是一个成员，如果要新增一个成员：
+
+```ts
+// Use this:
+type PartialWithNewMember<T> = {
+  [P in keyof T]?: T[P];
+} & { newMember: boolean }
+
+// **Do not** use the following!
+// This is an error!
+type PartialWithNewMember<T> = {
+  [P in keyof T]?: T[P];
+  newMember: boolean;
+}
+```
+
+#### Inference from mapped types
+
+```ts
+function unproxify<T>(t: Proxify<T>): T {
+  let result = {} as T;
+  for (const k in t) {
+    result[k] = t[k].get();
+  }
+  return result;
+}
+
+let originalProps = unproxify(proxyProps);
+```
+
+### Conditional Types
+
+```ts
+T extends U ? X : Y
+
+declare function f<T extends boolean>(x: T): T extends true ? string : number;
+// Type is 'string | number'
+let x = f(Math.random() < 0.5);
+```
+
+如果传入条件类型的泛型参数类型同样为泛型，那么无法确知推断出其类型：
+
+```ts
+interface Foo {
+  propA: boolean;
+  propB: boolean;
+}
+
+declare function f<T>(x: T): T extends Foo ? string : number;
+
+function foo<U>(x: U) {
+  // Has type 'U extends Foo ? string : number'
+  let a = f(x);
+
+  // This assignment is allowed though!
+  let b: string | number = a;
+}
+```
+
+因为无法确切得知x的类型，那么f的执行结果可能为string或number。
+
+### Distributive conditional types
+
+如果传入给`T extends U ? X : Y`的参数类型是`A | B | C`，那么推断的结果则是：`(A extends U ? X : Y) | (B extends U ? X : Y) | (C extends U ? X : Y)`。
+
+分布条件类型常常用于过滤：
+
+```ts
+type Diff<T, U> = T extends U ? never : T; // Remove types from T that are assignable to U
+type Filter<T, U> = T extends U ? T : never; // Remove types from T that are not assignable to U
+
+type T30 = Diff<"a" | "b" | "c" | "d", "a" | "c" | "f">; // "b" | "d"
+type T31 = Filter<"a" | "b" | "c" | "d", "a" | "c" | "f">; // "a" | "c"
+type T32 = Diff<string | number | (() => void), Function>; // string | number
+type T33 = Filter<string | number | (() => void), Function>; // () => void
+
+type NonNullable<T> = Diff<T, null | undefined>; // Remove null and undefined from T
+
+type T34 = NonNullable<string | number | undefined>; // string | number
+type T35 = NonNullable<string | string[] | null | undefined>; // string | string[]
+
+function f1<T>(x: T, y: NonNullable<T>) {
+  x = y; // Ok
+  y = x; // Error
+}
+
+function f2<T extends string | undefined>(x: T, y: NonNullable<T>) {
+  x = y; // Ok
+  y = x; // Error
+  let s1: string = x; // Error
+  let s2: string = y; // Ok
+}
+```
+
+条件类型和映射类型可以结合在一起使用：
+
+```ts
+type FunctionPropertyNames<T> = {
+  [K in keyof T]: T[K] extends Function ? K : never;
+}[keyof T];
+type FunctionProperties<T> = Pick<T, FunctionPropertyNames<T>>;
+
+type NonFunctionPropertyNames<T> = {
+  [K in keyof T]: T[K] extends Function ? never : K;
+}[keyof T];
+type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+
+interface Part {
+  id: number;
+  name: string;
+  subparts: Part[];
+  updatePart(newName: string): void;
+}
+
+type T40 = FunctionPropertyNames<Part>; // "updatePart"
+type T41 = NonFunctionPropertyNames<Part>; // "id" | "name" | "subparts"
+type T42 = FunctionProperties<Part>; // { updatePart(newName: string): void }
+type T43 = NonFunctionProperties<Part>; // { id: number, name: string, subparts: Part[] }
+```
+
+### Types inference in conditional types
+
+```ts
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+```
+
+```ts
+type Unpacked<T> = T extends (infer U)[]
+  ? U
+  : T extends (...args: any[]) => infer U
+  ? U
+  : T extends Promise<infer U>
+  ? U
+  : T;
+
+type T0 = Unpacked<string>; // string
+type T1 = Unpacked<string[]>; // string
+type T2 = Unpacked<() => string>; // string
+type T3 = Unpacked<Promise<string>>; // string
+type T4 = Unpacked<Promise<string>[]>; // Promise<string>
+type T5 = Unpacked<Unpacked<Promise<string>[]>>; // string
+```
+
+对不同变量的对象推断得到联合类型
+
+```ts
+type Foo<T> = T extends { a: infer U; b: infer U } ? U : never;
+type T10 = Foo<{ a: string; b: string }>; // string
+type T11 = Foo<{ a: string; b: number }>; // string | number
+```
+
+对不同变量的对象推断得到相交类型
+
+```ts
+type Bar<T> = T extends { a: (x: infer U) => void; b: (x: infer U) => void }
+  ? U
+  : never;
+type T20 = Bar<{ a: (x: string) => void; b: (x: string) => void }>; // string
+type T21 = Bar<{ a: (x: string) => void; b: (x: number) => void }>; // string & number
+```
+
+函数重载时作用于最后一个函数签名
+
+```ts
+declare function foo(x: string): number;
+declare function foo(x: number): string;
+declare function foo(x: string | number): string | number;
+type T30 = ReturnType<typeof foo>; // string | number
+```
+
+`infer`不能用于类型参数
+
+```ts
+type ReturnType<T extends (...args: any[]) => infer R> = R; // Error, not supported
+```
+
+但可以通过下面方法实现相同效果
+
+```ts
+type AnyFunction = (...args: any[]) => any;
+type ReturnType<T extends AnyFunction> = T extends (...args: any[]) => infer R
+  ? R
+  : any;
+```
+
+### Predefined conditional types
+
+- `Exclude<T, U>` -- 从`T`中剔除可以赋值给`U`的类型。
+- `Extract<T, U>` -- 提取`T`中可以赋值给`U`的类型。
+- `NonNullable` -- 从`T`中剔除`null`和`undefined`。
+- `ReturnType` -- 获取函数返回值类型。
+- `InstanceType` -- 获取构造函数类型的实例类型。
+
+```ts
+type T00 = Exclude<"a" | "b" | "c" | "d", "a" | "c" | "f">;  // "b" | "d"
+type T01 = Extract<"a" | "b" | "c" | "d", "a" | "c" | "f">;  // "a" | "c"
+type T04 = NonNullable<string | number | undefined>;  // string | number
+type T10 = ReturnType<() => string>;  // string
+type T20 = InstanceType<typeof C>;  // C
+type T21 = InstanceType<any>;  // any
+type T22 = InstanceType<never>;  // any
+type T23 = InstanceType<string>;  // Error
+type T24 = InstanceType<Function>;  // Error
+```
 
