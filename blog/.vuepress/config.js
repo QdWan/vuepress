@@ -79,6 +79,13 @@ module.exports = {
 					children: getFiles('blog/Nginx')
 				}
 			],
+			'/Alogorithms/': [
+				{
+					title: 'Alogorithms',
+					collapsable: false,
+					children: getFiles('blog/Alogorithms')
+				}
+			],
 			'/': [
 				{
 					title: '主页',
