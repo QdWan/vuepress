@@ -79,11 +79,11 @@ module.exports = {
 					children: getFiles('blog/Nginx')
 				}
 			],
-			'/Alogorithms/': [
+			'/Algorithms/': [
 				{
-					title: 'Alogorithms',
+					title: 'Algorithms',
 					collapsable: false,
-					children: getFiles('blog/Alogorithms')
+					children: getFiles('blog/Algorithms')
 				}
 			],
 			'/': [
