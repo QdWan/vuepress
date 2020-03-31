@@ -1843,3 +1843,235 @@ type T23 = InstanceType<string>;  // Error
 type T24 = InstanceType<Function>;  // Error
 ```
 
+
+
+##Declaring Merging
+
+### Merging Interfaces
+
+```ts
+interface Box {
+  height: number;
+  width: number;
+}
+
+interface Box {
+  scale: number;
+}
+
+let box: Box = { height: 5, width: 6, scale: 10 };
+```
+
+接口中的非函数成员必须唯一，如果不唯一也必须对应类型一致。
+
+接口中存在相同名称的函数成员时就会形成重载，并且靠后声明的具有较高的优先级：
+
+```ts
+interface Cloner {
+  clone(animal: Animal): Animal;
+}
+
+interface Cloner {
+  clone(animal: Sheep): Sheep;
+}
+
+interface Cloner {
+  clone(animal: Dog): Dog;
+  clone(animal: Cat): Cat;
+}
+
+// result
+interface Cloner {
+  clone(animal: Dog): Dog;
+  clone(animal: Cat): Cat;
+  clone(animal: Sheep): Sheep;
+  clone(animal: Animal): Animal;
+}
+```
+
+但是，如果函数参数为单个字符串字面量类型（不是联合字面量类型），将会提高最高优先级：
+
+```ts
+interface Document {
+  createElement(tagName: any): Element;
+}
+interface Document {
+  createElement(tagName: "div"): HTMLDivElement;
+  createElement(tagName: "span"): HTMLSpanElement;
+}
+interface Document {
+  createElement(tagName: string): HTMLElement;
+  createElement(tagName: "canvas"): HTMLCanvasElement;
+}
+
+// result
+interface Document {
+  createElement(tagName: "canvas"): HTMLCanvasElement;
+  createElement(tagName: "div"): HTMLDivElement;
+  createElement(tagName: "span"): HTMLSpanElement;
+  createElement(tagName: string): HTMLElement;
+  createElement(tagName: any): Element;
+}
+```
+
+### Merging Namespaces
+
+```ts
+namespace Animals {
+  export class Zebra {}
+}
+
+namespace Animals {
+  export interface Legged {
+    numberOfLegs: number;
+  }
+  export class Dog {}
+}
+// is equivalent to
+namespace Animals {
+  export interface Legged {
+    numberOfLegs: number;
+  }
+
+  export class Zebra {}
+  export class Dog {}
+}
+```
+
+未被export的变量在合并之后，只存在于原来的namespace中：
+
+```ts
+namespace Animal {
+  let haveMuscles = true;
+
+  export function animalsHaveMuscles() {
+    return haveMuscles;
+  }
+}
+
+namespace Animal {
+  export function doAnimalsHaveMuscles() {
+    return haveMuscles; // Error, because haveMuscles is not accessible here
+  }
+}
+```
+
+### Merging Namespaces with Classes, Functions and Enums
+
+#### Merging Namespaces with Classes
+
+```ts
+class Album {
+  label: Album.AlbumLabel;
+}
+namespace Album {
+  export class AlbumLabel {}
+}
+```
+
+```ts
+function buildLabel(name: string): string {
+  return buildLabel.prefix + name + buildLabel.suffix;
+}
+
+namespace buildLabel {
+  export let suffix = "";
+  export let prefix = "Hello, ";
+}
+
+console.log(buildLabel("Sam Smith"));
+```
+
+```ts
+enum Color {
+  red = 1,
+  green = 2,
+  blue = 4
+}
+
+namespace Color {
+  export function mixColor(colorName: string) {
+    if (colorName == "yellow") {
+      return Color.red + Color.green;
+    } else if (colorName == "white") {
+      return Color.red + Color.green + Color.blue;
+    } else if (colorName == "magenta") {
+      return Color.red + Color.blue;
+    } else if (colorName == "cyan") {
+      return Color.green + Color.blue;
+    }
+  }
+}
+```
+
+### Disallowed Merges
+
+类无法和其他的类或者变量进行合并。
+
+### Module Augmentation
+
+```ts
+// observable.ts
+export class Observable<T> {
+  // ... implementation left as an exercise for the reader ...
+}
+
+// map.ts
+import { Observable } from "./observable";
+Observable.prototype.map = function(f) {
+  // ... another exercise for the reader
+};
+```
+
+上述例子中，typescript编译器无法获知`Observable.prototype.map`的任何信息。
+
+```ts
+// observable.ts
+export class Observable<T> {
+  // ... implementation left as an exercise for the reader ...
+}
+
+// map.ts
+import { Observable } from "./observable";
+declare module "./observable" {
+  interface Observable<T> {
+    map<U>(f: (x: T) => U): Observable<U>;
+  }
+}
+Observable.prototype.map = function(f) {
+  // ... another exercise for the reader
+};
+
+// consumer.ts
+import { Observable } from "./observable";
+import "./map";
+let o: Observable<number>;
+o.map(x => x.toFixed());
+```
+
+通过module augmentation可以解决这个问题。
+
+module augmentation有两个限制：
+
+- 无法在顶层增加新的声明，只能扩展已有声明
+- 默认导出无法被augmented
+
+### Global Augmentation
+
+```ts
+// observable.ts
+export class Observable<T> {
+  // ... still no implementation ...
+}
+
+declare global {
+  interface Array<T> {
+    toObservable(): Observable<T>;
+  }
+}
+
+Array.prototype.toObservable = function() {
+  // ...
+};
+```
+
