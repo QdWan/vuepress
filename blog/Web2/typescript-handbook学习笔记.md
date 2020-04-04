@@ -1843,8 +1843,6 @@ type T23 = InstanceType<string>;  // Error
 type T24 = InstanceType<Function>;  // Error
 ```
 
-
-
 ##Declaring Merging
 
 ### Merging Interfaces
@@ -2074,4 +2072,361 @@ Array.prototype.toObservable = function() {
   // ...
 };
 ```
+
+
+
+## Decorators
+
+使用decorator，需要在tsconfig.json中开启`experimentalDecorators`。
+
+### Decorator Factories
+
+### Decorator Composition
+
+- decorator表达式自顶向下执行
+- 表达式返回的结果自底向上执行
+
+```ts
+function f() {
+  console.log("f(): evaluated");
+  return function(target, propertyKey: string, descriptor: PropertyDescriptor) {
+    console.log("f(): called");
+  };
+}
+
+function g() {
+  console.log("g(): evaluated");
+  return function(target, propertyKey: string, descriptor: PropertyDescriptor) {
+    console.log("g(): called");
+  };
+}
+
+class C {
+  @f()
+  @g()
+  method() {}
+}
+
+// result
+f(): evaluated
+g(): evaluated
+g(): called
+f(): called
+```
+
+### Decorator Evaluation
+
+### Class Decorator
+
+class decorator在类前声明，作用于类的构造函数。无法用于声明文件（例如`declare`类）。
+
+class decorator将在运行时作为函数被调用，类的构造函数作为其唯一的参数。
+
+如果class decorator有返回值，那么该返回值将替换掉原先的构造函数。
+
+```ts
+function sealed(constructor: Function) {
+  Object.seal(constructor);
+  Object.seal(constructor.prototype);
+}
+
+@sealed
+class Greeter {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+```
+
+```ts
+function classDecorator<T extends { new (...args: any[]): {} }>(
+  constructor: T
+) {
+  return class extends constructor {
+    newProperty = "new property";
+    hello = "override";
+  };
+}
+
+@classDecorator
+class Greeter {
+  property = "property";
+  hello: string;
+  constructor(m: string) {
+    this.hello = m;
+  }
+}
+
+console.log(new Greeter("world"));// { "property": "property", "hello": "override", "newProperty": "new property" } 
+```
+
+### Method Decorator
+
+method decorator在类方法前声明。作用于方法的`Property Descriptor`，可以观察、修改、替换调用方法的定义。和class decorator一样，无法用于声明文件中。
+
+method decorator在运行时被调用，并接受三个参数：
+
+- 对于静态方法，则是类的构造函数；对于实例方法，则是实例本身
+- 方法的名字
+- 方法的`Property Descriptor`，**注意：如果目标环境低于ES5，那么该值为undefined**
+
+```ts
+function enumerable(value: boolean) {
+  return function(
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    descriptor.enumerable = value;
+  };
+}
+
+class Greeter {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+
+  @enumerable(false)
+  greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+```
+
+### Accessor Decorators
+
+accessor decorator在存取器前声明。同样作用于`Property Descritor`。
+
+**注意**：typescript不允许同时对同一个成员的`get`、`set`使用decorator，并且accessor decorator必须书写于前面的存取器中。因为`Property Descriptor`中可以指定`get`、` set`。
+
+accessor decorator接受的参数和method decorator一致。
+
+```ts
+function configurable(value: boolean) {
+  return function(
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    descriptor.configurable = value;
+  };
+}
+
+class Point {
+  private _x: number;
+  private _y: number;
+  constructor(x: number, y: number) {
+    this._x = x;
+    this._y = y;
+  }
+
+  @configurable(false)
+  get x() {
+    return this._x;
+  }
+
+  @configurable(false)
+  get y() {
+    return this._y;
+  }
+}
+```
+
+### Property Decorators
+
+property decorator在类成员变量前声明。
+
+只接受两个参数，没有`Property Descriptor`。
+
+```ts
+import "reflect-metadata";
+
+const formatMetadataKey = Symbol("format");
+
+function format(formatString: string) {
+  return Reflect.metadata(formatMetadataKey, formatString);
+}
+
+function getFormat(target: any, propertyKey: string) {
+  return Reflect.getMetadata(formatMetadataKey, target, propertyKey);
+}
+
+class Greeter {
+  @format("Hello, %s")
+  greeting: string;
+
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  greet() {
+    let formatString = getFormat(this, "greeting");
+    return formatString.replace("%s", this.greeting);
+  }
+}
+```
+
+### Parameter Decorators
+
+parameter decorator作用于方法参数。
+
+接受三个参数，第三个参数为该成员其所在参数列表中的序号。
+
+```ts
+import "reflect-metadata";
+
+const requiredMetadataKey = Symbol("required");
+
+function required(
+  target: Object,
+  propertyKey: string | symbol,
+  parameterIndex: number
+) {
+  let existingRequiredParameters: number[] =
+    Reflect.getOwnMetadata(requiredMetadataKey, target, propertyKey) || [];
+  existingRequiredParameters.push(parameterIndex);
+  Reflect.defineMetadata(
+    requiredMetadataKey,
+    existingRequiredParameters,
+    target,
+    propertyKey
+  );
+}
+
+function validate(
+  target: any,
+  propertyName: string,
+  descriptor: TypedPropertyDescriptor<Function>
+) {
+  let method = descriptor.value;
+  descriptor.value = function() {
+    let requiredParameters: number[] = Reflect.getOwnMetadata(
+      requiredMetadataKey,
+      target,
+      propertyName
+    );
+    if (requiredParameters) {
+      for (let parameterIndex of requiredParameters) {
+        if (
+          parameterIndex >= arguments.length ||
+          arguments[parameterIndex] === undefined
+        ) {
+          throw new Error("Missing required argument.");
+        }
+      }
+    }
+
+    return method.apply(this, arguments);
+  };
+}
+
+class Greeter {
+  greeting: string;
+
+  constructor(message: string) {
+    this.greeting = message;
+  }
+
+  @validate
+  greet(@required name: string) {
+    return "Hello " + name + ", " + this.greeting;
+  }
+}
+```
+
+### Metadata
+
+使用reflect-metadata
+
+```bash
+npm i reflect-metadata --save
+```
+
+开启装饰器：
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+```ts
+import "reflect-metadata";
+
+class Point {
+  x: number;
+  y: number;
+}
+
+class Line {
+  private _p0: Point;
+  private _p1: Point;
+
+  @validate
+  set p0(value: Point) {
+    this._p0 = value;
+  }
+  get p0() {
+    return this._p0;
+  }
+
+  @validate
+  set p1(value: Point) {
+    this._p1 = value;
+  }
+  get p1() {
+    return this._p1;
+  }
+}
+
+function validate<T>(
+  target: any,
+  propertyKey: string,
+  descriptor: TypedPropertyDescriptor<T>
+) {
+  let set = descriptor.set;
+  descriptor.set = function(value: T) {
+    let type = Reflect.getMetadata("design:type", target, propertyKey);
+    if (!(value instanceof type)) {
+      throw new TypeError("Invalid type.");
+    }
+    set.call(target, value);
+  };
+}
+```
+
+```ts
+class Line {
+  private _p0: Point;
+  private _p1: Point;
+
+  @validate
+  @Reflect.metadata("design:type", Point)
+  set p0(value: Point) {
+    this._p0 = value;
+  }
+  get p0() {
+    return this._p0;
+  }
+
+  @validate
+  @Reflect.metadata("design:type", Point)
+  set p1(value: Point) {
+    this._p1 = value;
+  }
+  get p1() {
+    return this._p1;
+  }
+}
+```
+
+- [JavaScript Reflect Metadata 详解](https://www.jianshu.com/p/653bce04db0b)
 
