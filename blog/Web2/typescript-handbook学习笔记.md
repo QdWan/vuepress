@@ -1843,7 +1843,9 @@ type T23 = InstanceType<string>;  // Error
 type T24 = InstanceType<Function>;  // Error
 ```
 
-##Declaring Merging
+
+
+## Declaring Merging
 
 ### Merging Interfaces
 
