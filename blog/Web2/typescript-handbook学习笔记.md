@@ -2432,3 +2432,98 @@ class Line {
 
 - [JavaScript Reflect Metadata 详解](https://www.jianshu.com/p/653bce04db0b)
 
+
+
+## Iterators and Generators
+
+### Iterables
+
+如果一个对象实现了`Symbol.iterator`属性，则被认为是可迭代的，例如内置类型：`Array`、`Map`、`Set`、`String`、`Int32Array`、`Uint32Array`等都实现了该属性。`Symbol.iterator`函数返回一个可迭代的值。
+
+### for..of statements
+
+for of表达式用于可迭代对象上，会调用其`Symbol.iterator`属性。
+
+```ts
+let someArray = [1, "string", false];
+
+for (let entry of someArray) {
+  console.log(entry); // 1, "string", false
+}
+```
+
+#### for..of vs. for..in statements
+
+for of返回的是列表的值；for in返回的是列表的键。
+
+```ts
+let list = [4, 5, 6];
+
+for (let i in list) {
+  console.log(i); // "0", "1", "2",
+}
+
+for (let i of list) {
+  console.log(i); // "4", "5", "6"
+}
+```
+
+for in可用于任何对象，for of用于可迭代的对象。
+
+```ts
+let pets = new Set(["Cat", "Dog", "Hamster"]);
+pets["species"] = "mammals";
+
+for (let pet in pets) {
+  console.log(pet); // "species"
+}
+
+for (let pet of pets) {
+  console.log(pet); // "Cat", "Dog", "Hamster"
+}
+```
+
+#### Code generation
+
+如果目标为ES5或者ES3，迭代器只能用于`Array`类型。
+
+```ts
+let numbers = [1, 2, 3];
+for (let num of numbers) {
+  console.log(num);
+}
+
+// generated below
+var numbers = [1, 2, 3];
+for (var _i = 0; _i < numbers.length; _i++) {
+  var num = numbers[_i];
+  console.log(num);
+}
+```
+
+
+
+## JSX
+
+### Basic usage
+
+使用JSX的两个条件：
+
+- 文件后缀名为`jsx`
+- 开启`jsx`选项
+
+TypsScript包含三种JSX模式：`preserve`、`react`、`react-native`。这些模式只在emit阶段有所区别，类型检查阶段不受影响。`preserve`模式会在输出文件时保留JSX部分，给其他转换器进行转换，例如babel。`react`模式emit `React.createElement`，输出后缀名变为`.js`。`react-native`模式和`preserve`类似，保留JSX部分，但是输出文件名后缀为`.js`。
+
+### The as operator
+
+使用TypeScript类型断言时，使用`as`运算符而不要使用尖括号。
+
+### Type Checking
+
+对于一个JSX表达式`<expr />`，`expr`可能是一个原生DOM，也可能是个组件，在TypeScript中使用和React一样的方式区分两者：首字母为大写为组件，否则为原生DOM。区分两者有以下两个原因：
+
+- 在React中，如果是原生DOM，则会转换为`React.createElement("div")`，而组件则会转换为`React.createElement(MyComponent)`。
+- 组件可以传递任意自定义属性，而原生则只能接收自有的属性。
+
+### Intrinsic elements
+
