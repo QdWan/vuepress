@@ -60,7 +60,7 @@ console.log(iterator.next()); // { value: 'a', done: false }
 
 ## 栈
 
-后进先出的数据结构。
+后进先出。
 
 包含的方法：
 
@@ -104,4 +104,126 @@ class Stack {
 
 
 ## 队列和双端队列
+
+先进先出。
+
+包含方法：
+
+- enqueue
+- dequeue
+- peek
+- isEmpty
+- size
+
+双端队列允许同时从前、后两处添加和删除元素。
+
+包含方法：
+
+- addFront
+- addBack
+- removeFront
+- removeBack
+- peekFront
+- peekBack
+
+### 使用队列和双端队列解决问题
+
+#### 循环队列——击鼓传花游戏
+
+#### 回文检查器
+
+#### JS任务队列
+
+
+
+## 链表
+
+与数组不同，链表元素并不是连续内存。
+
+包含的方法：
+
+- push
+- insert
+- getElementAt
+- remove
+- indexOf
+- removeAt
+- isEmpty
+- size
+
+### 双向链表
+
+一个链表节点中，既能链向下一个元素，也能链向上一个元素。
+
+### 循环链表
+
+既可以单向引用，也可以双向引用。head.prev指向tail，tail.next指向head。
+
+### 有序链表
+
+
+
+## 集合
+
+无序且唯一。
+
+包含的方法：
+
+- add
+- delete
+- has
+- clear
+- size
+- values
+
+### 集合运算
+
+- 并集
+- 交集
+- 差集
+- 子集
+
+#### 改进交集方法
+
+迭代元素数量较少的集合
+
+### 多重集或袋
+
+
+
+## 字典和散列表
+
+### 字典
+
+字典包含的方法：
+
+- set
+- remove
+- hasKey
+- get
+- clear
+- size
+- isEmpty
+- keys
+- values
+- keyValues
+- forEach
+
+### 散列表
+
+散列表包含的方法：
+
+- put
+- remove
+- get
+
+解决冲突：
+
+- 线性探查
+
+需要一个散列函数，利于lose lose、djb2。
+
+
+
+## 递归
 
