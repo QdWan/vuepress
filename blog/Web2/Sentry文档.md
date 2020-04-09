@@ -60,3 +60,19 @@ Sentry.captureException(new Error("Something broke"));
 
 ## Releases
 
+告知Sentry代码发布的版本号，可以带来以下功能：
+
+- 得知新版本发布带来的问题
+- 确定哪一次commit造成的问题，由此得知应该由谁来负责
+- 通过在commit信息中携带issue号来解决问题
+- 代码发布后接受邮箱通知
+
+配置了SDK后，设置以下两步操作开启Release功能：
+
+- 创建Release和相关Commits
+- 告诉Sentry你发布了新的版本
+
+详见Setnry官方文档中Workflow and Integration的Releases章节。
+
+可以通过配置Webpack插件进行配置。
+
