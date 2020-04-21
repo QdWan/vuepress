@@ -2527,3 +2527,243 @@ TypsScript包含三种JSX模式：`preserve`、`react`、`react-native`。这些
 
 ### Intrinsic elements
 
+intrinsic elements会查找`JSX.IntrinsciElements`接口。如果该接口未被定义，intrinsic elements将不会进行类型检查。
+
+```ts
+declare namespace JSX {
+  interface IntrinsicElements {
+    foo: any;
+  }
+}
+
+<foo />; // ok
+<bar />; // error
+```
+
+上述例子中，bar不存在于`JSX.IntrinsciElements`接口中，因此报错。
+
+### Value-based elements
+
+有两种方法定义value-based element：
+
+- Function Component
+- Class Component
+
+因为这两种value-based elements在JSX中难以分辨，TS将先按Function Component的方式进行解析，如果失败则按Class Component的方式进行解析，两者都失败则抛出错误。
+
+#### Function Component
+
+因为Function Component就是JS函数，因此可以进行函数重载：
+
+```ts
+interface ClickableProps {
+  children: JSX.Element[] | JSX.Element
+}
+
+interface HomeProps extends ClickableProps {
+  home: JSX.Element;
+}
+
+interface SideProps extends ClickableProps {
+  side: JSX.Element | string;
+}
+
+function MainButton(prop: HomeProps): JSX.Element;
+function MainButton(prop: SideProps): JSX.Element {
+  ...
+}
+```
+
+#### Class Component
+
+element instance type可被赋值于`JSX.ElementClass`，默认的`JSX.ElementClass`为`{}`，可以对其进行增强以限制类型：
+
+```ts
+declare namespace JSX {
+  interface ElementClass {
+    render: any;
+  }
+}
+
+class MyComponent {
+  render() {}
+}
+function MyFactoryFunction() {
+  return { render: () => {} };
+}
+
+<MyComponent />; // ok
+<MyFactoryFunction />; // ok
+
+class NotAValidComponent {}
+function NotAValidFactoryFunction() {
+  return {};
+}
+
+<NotAValidComponent />; // error
+<NotAValidFactoryFunction />; // error
+```
+
+### Attribute type checking
+
+intrinsic elements的属性检查取决于`JSX.IntrinsciElements`的属性：
+
+```ts
+declare namespace JSX {
+  interface IntrinsicElements {
+    foo: { bar?: boolean };
+  }
+}
+
+// element attributes type for 'foo' is '{bar?: boolean}'
+<foo bar />;
+```
+
+value-based elements的属性检查较为复杂一些。取决于element instance type的属性，由`JSX.ElementAttributesProperty`决定。应当只定义一个属性，该属性名将被用于检查。如果`JSX.ElementAttributesProperty`未提供，则使用类构造函数或函数组件调用的第一个参数：
+
+```ts
+declare namespace JSX {
+  interface ElementAttributesProperty {
+    props; // specify the property name to use
+  }
+}
+
+class MyComponent {
+  // specify the property on the element instance type
+  props: {
+    foo?: string;
+  };
+}
+
+// element attributes type for 'MyComponent' is '{foo?: string}'
+<MyComponent foo="bar" />;
+```
+
+更多例子：
+
+```ts
+declare namespace JSX {
+  interface IntrinsicElements {
+    foo: { requiredProp: string; optionalProp?: number };
+  }
+}
+
+<foo requiredProp="bar" />; // ok
+<foo requiredProp="bar" optionalProp={0} />; // ok
+<foo />; // error, requiredProp is missing
+<foo requiredProp={0} />; // error, requiredProp should be a string
+<foo requiredProp="bar" unknownProp />; // error, unknownProp does not exist
+<foo requiredProp="bar" some-unknown-prop />; // ok, because 'some-unknown-prop' is not a valid identifier
+```
+
+需要注意的是，如果属性名不是有效的JS标识符，例如`data-*`，将不会报错。
+
+此外，`JSX.IntrinsicElements`用于声明JSX框架所需的额外的属性，而不是组件props或者arguments，例如React中的`key`。`JSX.IntrinsciClassAttributes<T>`可以用于声明class components的额外属性。该泛型参数对应类的实例类型。在React中，用于`Ref<T>`的`ref`属性。
+
+扩展运算符可正常工作：
+
+```ts
+var props = { requiredProp: "bar" };
+<foo {...props} />; // ok
+
+var badProps = {};
+<foo {...badProps} />; // error
+```
+
+### Children Type Checking
+
+使用`JSX.ElementChildrenAttribute`定义children属性类型：
+
+```ts
+declare namespace JSX {
+  interface ElementChildrenAttribute {
+    children: {}; // specify children name to use
+  }
+}
+```
+
+在React typings中定义其他类型的children：
+
+```ts
+interface PropsType {
+  children: JSX.Element
+  name: string
+}
+
+class Component extends React.Component<PropsType, {}> {
+  render() {
+    return (
+      <h2>
+        {this.props.children}
+      </h2>
+    )
+  }
+}
+
+// OK
+<Component name="foo">
+  <h1>Hello World</h1>
+</Component>
+
+// Error: children is of type JSX.Element not array of JSX.Element
+<Component name="bar">
+  <h1>Hello World</h1>
+  <h2>Hello World</h2>
+</Component>
+
+// Error: children is of type JSX.Element not array of JSX.Element or string.
+<Component name="baz">
+  <h1>Hello</h1>
+  World
+</Component>
+```
+
+### The JSX result type
+
+### Embedding Expressions
+
+```ts
+var a = <div>
+  {["foo", "bar"].map(i => <span>{i / 2}</span>)}
+</div>
+```
+
+JSX可以在`{}`中使用嵌套表达式。上述例子中会出现报错，因为string类型不能和number相除。
+
+### React integration
+
+在React中使用JSX应当使用React typings。
+
+```ts
+/// <reference path="react.d.ts" />
+
+interface Props {
+  foo: string;
+}
+
+class MyComponent extends React.Component<Props, {}> {
+  render() {
+    return <span>{this.props.foo}</span>;
+  }
+}
+
+<MyComponent foo="bar" />; // ok
+<MyComponent foo={0} />; // error
+```
+
+### Factory Functions
+
+factory functions是可配置的。可以通过`jsxFactory`命令或者内联`@jsx`编译注视对文件进行单独配置。例如：如果设置`jsxFactory`为`createElement`，`<div />`将转换为`createElement("div")`，而不是`React.createElement("div")`。
+
+```ts
+import preact = require("preact");
+/* @jsx preact.h */
+const x = <div />;
+
+// emits as:
+
+const preact = require("preact");
+const x = preact.h("div", null);
+```
+
+fatory的选择会影响JSX namespace的查找。如果fatory定义为`React.createElement`，则编译器会优先检查`React.JSX`，其次是全局JSX。
