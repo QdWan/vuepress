@@ -2767,3 +2767,446 @@ const x = preact.h("div", null);
 ```
 
 fatory的选择会影响JSX namespace的查找。如果fatory定义为`React.createElement`，则编译器会优先检查`React.JSX`，其次是全局JSX。
+
+
+
+## Mixins
+
+### Mixin sample
+
+```ts
+// Disposable Mixin
+class Disposable {
+  isDisposed: boolean;
+  dispose() {
+    this.isDisposed = true;
+  }
+}
+
+// Activatable Mixin
+class Activatable {
+  isActive: boolean;
+  activate() {
+    this.isActive = true;
+  }
+  deactivate() {
+    this.isActive = false;
+  }
+}
+
+class SmartObject {
+  constructor() {
+    setInterval(
+      () => console.log(this.isActive + " : " + this.isDisposed),
+      500
+    );
+  }
+
+  interact() {
+    this.activate();
+  }
+}
+
+interface SmartObject extends Disposable, Activatable {}
+applyMixins(SmartObject, [Disposable, Activatable]);
+
+let smartObj = new SmartObject();
+setTimeout(() => smartObj.interact(), 1000);
+
+////////////////////////////////////////
+// In your runtime library somewhere
+////////////////////////////////////////
+
+function applyMixins(derivedCtor: any, baseCtors: any[]) {
+  baseCtors.forEach(baseCtor => {
+    Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+      Object.defineProperty(
+        derivedCtor.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(baseCtor.prototype, name)
+      );
+    });
+  });
+}
+```
+
+### Understanding the sample
+
+上述例子中并没有在class中extend，而是在interface中extend。因为声明合并，`SmartObject`interface将会被混入`SamrObject`类中。这意味着Disposable和Activatable存在于类型中，而不是具体实现。
+
+
+
+## Modules
+
+### Export
+
+#### Eporting a declaration
+
+```ts
+// StringValidator.ts
+export interface StringValidator {
+  isAcceptable(s: string): boolean;
+}
+
+// ZipCodeValidator.ts
+import { StringValidator } from "./StringValidator";
+
+export const numberRegexp = /^[0-9]+$/;
+
+export class ZipCodeValidator implements StringValidator {
+  isAcceptable(s: string) {
+    return s.length === 5 && numberRegexp.test(s);
+  }
+}
+```
+
+#### Export statements
+
+```ts
+class ZipCodeValidator implements StringValidator {
+  isAcceptable(s: string) {
+    return s.length === 5 && numberRegexp.test(s);
+  }
+}
+export { ZipCodeValidator };
+export { ZipCodeValidator as mainValidator };
+```
+
+#### Re-exports
+
+```ts
+export class ParseIntBasedZipCodeValidator {
+  isAcceptable(s: string) {
+    return s.length === 5 && parseInt(s).toString() === s;
+  }
+}
+
+// Export original validator but rename it
+export { ZipCodeValidator as RegExpBasedZipCodeValidator } from "./ZipCodeValidator";
+```
+
+### Import
+
+#### Import a single export from a module
+
+```ts
+import { ZipCodeValidator } from "./ZipCodeValidator";
+let myValidator = new ZipCodeValidator();
+
+// can also be renamed
+import { ZipCodeValidator as ZCV } from "./ZipCodeValidator";
+let myValidator = new ZCV();
+```
+
+#### Import the entire module into a single variable, and use it to access the module exports
+
+```ts
+import * as validator from "./ZipCodeValidator";
+let myValidator = new validator.ZipCodeValidator();
+```
+
+#### Import a module for side-effects only
+
+```ts
+import "./my-module.js";
+```
+
+#### Importing Types
+
+```ts
+// Re-using the same import
+import {APIResponseType} from "./api";
+
+// Explicitly use import type
+import type {APIResponseType} from "./api";
+```
+
+### Default exports
+
+```ts
+// export
+declare let $: JQuery;
+export default $;
+
+// import
+import $ from "jquery";
+$("button.continue").html("Next Step...");
+```
+
+#### Export all as x
+
+```ts
+// export
+export * as utilities from "./utilities";
+
+// import
+import { utilities } from "./index";
+```
+
+### export = and import = require()
+
+使用`export =`导出时，需要使用`import = require()`导入：
+
+```ts
+// export
+let numberRegexp = /^[0-9]+$/;
+class ZipCodeValidator {
+  isAcceptable(s: string) {
+    return s.length === 5 && numberRegexp.test(s);
+  }
+}
+export = ZipCodeValidator;
+
+
+// import
+import zip = require("./ZipCodeValidator");
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+// Validators to use
+let validator = new zip();
+// Show whether each string passed each validator
+strings.forEach(s => {
+  console.log(
+    `"${s}" - ${validator.isAcceptable(s) ? "matches" : "does not match"}`
+  );
+});
+```
+
+### Code Generation for Modules
+
+编译器会根据module target生成合适的模块加载代码。
+
+export
+
+```ts
+import m = require("mod");
+export let t = m.something + 1;
+```
+
+AMD
+
+```ts
+define(["require", "exports", "./mod"], function(require, exports, mod_1) {
+  exports.t = mod_1.something + 1;
+});
+```
+
+CommonJS
+
+```ts
+var mod_1 = require("./mod");
+exports.t = mod_1.something + 1;
+```
+
+UMD
+
+```ts
+(function(factory) {
+  if (typeof module === "object" && typeof module.exports === "object") {
+    var v = factory(require, exports);
+    if (v !== undefined) module.exports = v;
+  } else if (typeof define === "function" && define.amd) {
+    define(["require", "exports", "./mod"], factory);
+  }
+})(function(require, exports) {
+  var mod_1 = require("./mod");
+  exports.t = mod_1.something + 1;
+});
+```
+
+System
+
+```ts
+System.register(["./mod"], function(exports_1) {
+  var mod_1;
+  var t;
+  return {
+    setters: [
+      function(mod_1_1) {
+        mod_1 = mod_1_1;
+      }
+    ],
+    execute: function() {
+      exports_1("t", (t = mod_1.something + 1));
+    }
+  };
+});
+```
+
+Native ES 2015 module
+
+```ts
+import { something } from "./mod";
+export var t = something + 1;
+```
+
+#### Simple Example
+
+### Optional Module Loading and Other Advanced Loading Scenarios
+
+如果导入的变量只用于类型检查，而没有用于表达式，那么该模块并不会被包含在emit
+
+之后的JS中。有时候需要根据条件动态加载模块：
+
+```ts
+declare function require(moduleName: string): any;
+
+import { ZipCodeValidator as Zip } from "./ZipCodeValidator";
+
+if (needZipValidation) {
+  let ZipCodeValidator: typeof Zip = require("./ZipCodeValidator");
+  let validator = new ZipCodeValidator();
+  if (validator.isAcceptable("...")) {
+    /* ... */
+  }
+}
+```
+
+### Working with Other JS Libraries
+
+#### Ambient Modules
+
+通过`module`关键字声明不同模块的类型：
+
+```ts
+declare module "url" {
+  export interface Url {
+    protocol?: string;
+    hostname?: string;
+    pathname?: string;
+  }
+
+  export function parse(
+    urlStr: string,
+    parseQueryString?,
+    slashesDenoteHost?
+  ): Url;
+}
+
+declare module "path" {
+  export function normalize(p: string): string;
+  export function join(...paths: any[]): string;
+  export var sep: string;
+}
+```
+
+导入相应的类型信息：
+
+```ts
+/// <reference path="node.d.ts"/>
+import * as URL from "url";
+// import url = require("url") // 也可以这样导入
+let myUrl = URL.parse("http://www.typescriptlang.org");
+```
+
+#### Wildcard module declarations
+
+导入非js类型的文件：
+
+```ts
+declare module "*!text" {
+  const content: string;
+  export default content;
+}
+// Some do it the other way around.
+declare module "json!*" {
+  const value: any;
+  export default value;
+}
+```
+
+```ts
+import fileContent from "./xyz.txt!text";
+import data from "json!http://example.com/data.json";
+console.log(data, fileContent);
+```
+
+#### UMD modules
+
+```ts
+export function isPrime(x: number): boolean;
+export as namespace mathLib;
+```
+
+```ts
+import { isPrime } from "math-lib";
+isPrime(2);
+mathLib.isPrime(2); // ERROR: can't use the global definition from inside a module
+```
+
+mathLib也可以在script中当作全局变量使用（A script is a file with no imports or exports)：
+
+```ts
+mathLib.isPrime(2);
+```
+
+### Guidance for structuring moduels
+
+#### If you're only exporting a single class or functionm use export default
+
+```ts
+// MyClass.ts
+export default class SomeType {
+  constructor() { ... }
+}
+```
+
+```ts
+// MyFunc.ts
+export default function getThing() {
+  return "thing";
+}
+```
+
+```ts
+// Consumer.ts
+import t from "./MyClass";
+import f from "./MyFunc";
+let x = new t();
+console.log(f());
+```
+
+#### If you're exporting multiple objects, put them all at top-level
+
+```ts
+// MyThing.ts
+export class SomeType {
+  /* ... */
+}
+export function someFunc() {
+  /* ... */
+}
+```
+
+````ts
+// Consumer.ts
+import { SomeType, someFunc } from "./MyThings";
+let x = new SomeType();
+let y = someFunc();
+````
+
+#### Use the namespace import pattern if you're importing a large number of things
+
+```ts
+// MyLargeModule.ts
+export class Dog { ... }
+export class Cat { ... }
+export class Tree { ... }
+export class Flower { ... }
+```
+
+```ts
+// Consumer.ts
+import * as myLargeModule from "./MyLargeModule.ts";
+let x = new myLargeModule.Dog();
+```
+
+### Re-export to extend
+
+### Do not use namespaces in modules
+
+### Red Flags
+
+- 顶级声明为`export namespace Foo { ... }`（移除`Foo`，将其中内容移动至顶级声明中）
+- 多个文件在顶级声明中包含相同的`export namespace Foo { ... }`。
+
