@@ -24,7 +24,8 @@ module.exports = {
 					{ text: 'Kubernetes', link: '/Kubernetes/' },
 					{ text: 'Docker', link: '/Docker/' },
 					{ text: 'Linux', link: '/Linux/' },
-					{ text: 'Nginx', link: '/Nginx/' }
+					{ text: 'Nginx', link: '/Nginx/' },
+					{ text: 'Sentry', link: '/Sentry/' },
 				] 
 			},
 			{ text: 'Github', link: 'https://github.com/Limsanity' },
@@ -84,6 +85,13 @@ module.exports = {
 					title: 'Algorithms',
 					collapsable: false,
 					children: getFiles('blog/Algorithms')
+				}
+			],
+			'/Sentry/': [
+				{
+					title: 'Sentry',
+					collapsable: false,
+					children: getFiles('blog/Sentry')
 				}
 			],
 			'/': [
